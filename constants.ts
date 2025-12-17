@@ -1,0 +1,219 @@
+import { BookingType, Destination, FeaturedDestination, HeroSlide, Mood } from './types';
+
+export const HERO_SLIDES: HeroSlide[] = [
+  {
+    id: 1,
+    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=2600&auto=format&fit=crop',
+    title: 'Discover the Soul of India',
+    subtitle: 'From the serene backwaters of Kerala to the majestic peaks of the Himalayas, find your perfect mood.'
+  },
+  {
+    id: 2,
+    image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2940&auto=format&fit=crop',
+    title: 'Adventure Awaits You',
+    subtitle: 'Experience the thrill of high altitudes, snow-capped peaks, and untouched nature.'
+  },
+  {
+    id: 3,
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2946&auto=format&fit=crop',
+    title: 'Tropical Paradise Escape',
+    subtitle: 'Relax on golden sands and dive into crystal clear waters in the world\'s best beach destinations.'
+  },
+  {
+    id: 4,
+    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2600&auto=format&fit=crop',
+    title: 'Experience Global Culture',
+    subtitle: 'Immerse yourself in the history, art, and vibrant flavors of iconic international cities.'
+  }
+];
+
+export const MOODS: Mood[] = [
+  { id: 'relaxed', name: 'Relaxed', icon: 'spa', colorClass: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' },
+  { id: 'adventure', name: 'Adventure', icon: 'hiking', colorClass: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
+  { id: 'romantic', name: 'Romantic', icon: 'favorite', colorClass: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400' },
+  { id: 'spiritual', name: 'Spiritual', icon: 'temple_buddhist', colorClass: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' },
+  { id: 'foodie', name: 'Foodie', icon: 'restaurant', colorClass: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' },
+  { id: 'beach', name: 'Beach', icon: 'beach_access', colorClass: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' },
+  { id: 'nightlife', name: 'Nightlife', icon: 'nightlife', colorClass: 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-600 dark:text-fuchsia-400' },
+];
+
+export const TRENDING_DESTINATIONS: Destination[] = [
+  {
+    id: 'goa',
+    name: 'Goa, India',
+    price: '₹12,999',
+    description: 'Sun, sand, and seafood. Experience the ultimate beach vacation.',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCo2QavBzKBZUddieX7QvBQ2QPKxta_A_q3Vv7bN97X3lhYZXdMoDOS5kmTAnnhCyNzI5MtdOZhRG1FW5rB-RufgwTQq0ENTEcvCyyMWj5cmj_6USG-gnhlzw7N1POBRxAk0_oSutj3tnNx2nc3sIgLYK8FQzb20JDqupGC8zj8Qv-rxcEfz8dokgs6bfMSNDMlKmrkS-1mFAqqa2DXNg_FbErIZnTixhBvy4o9VUKOpO3GozqfTA-3HolXZ-TMzTLd43wJGeKQZ2U',
+    rating: 4.8
+  },
+  {
+    id: 'jaipur',
+    name: 'Jaipur, Rajasthan',
+    price: '₹8,499',
+    description: 'Explore the Pink City, ancient forts, and royal heritage.',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBy6Tu6w58uXSdP6lmJ-Lm6u3xcaBCj2s_oltwe3qetyIXpme9Auo5cIzYgJ_jl8ihJNAcH7MypZLf6-1fAgFv-mI3wx8K8ZLEo2piEplhRRFG1sI9VmBgDwI4FXFuaeICk8TLvyHIdArfBl3VtRbFxsEFP6pjmaTOvaq0V_OgTFyLanTVvWDdu7gW7EZR3RJYYZD9KN4lmn0GPfiNA6VAEHGPXMqdg1Op8unUIGYbKhh_T-VCRCnIbH5HwGlzMoz23YRJtfQSIISs',
+    rating: 4.6
+  },
+  {
+    id: 'manali',
+    name: 'Manali, HP',
+    price: '₹15,200',
+    description: 'Adventure sports, snow-capped peaks, and pine forests.',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCG4lfDwqEfzu8K679fs_JOv48oTCM80E_THEdICXvpxe6s14utDwUq7HkfBHFClL3k6gPtaXT__zvtEOkXSycO12Tfq5gdwpp7qawec952kmEim0o04HxV-tEzkuCVSckuCaHEibWE0OelR8CkNGdWUWjhryoRe7jtxx2z5e3A4Z8Pbhf9lRQyKmBZrNj9dH6z_ylqX6PFh332axpa8TBmIxwGVdRot7Qy-8pKfBiMALIZgW_S5Q6vn_c5NvMGgfJ6_9BMyzcpA9I',
+    rating: 4.9
+  },
+  {
+    id: 'kerala',
+    name: 'Kerala',
+    price: '₹18,500',
+    description: 'God\'s own country. Serene backwaters and lush greenery.',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDjaF2cwGTr7RA_3wZS7uPn4Dc86GA8c-I8SpY3zryptbeApMeYfL4bmCjA-oWZOP1YUXo_IvrrWSbjHS-KtKIyPVxG5DraFf6j1Mz7iXgJd0nML-maouZUPgM0_ChF17ftLVn6Zn8qgW4Uq_zHp8Tqcq32ej-5E7dAWyUEhoKHDJBGxfWrFjLBUUfABfySTr498k6eAi866sZr42PLEl7oKyGK4xXc5nL_bF_0_wLB9zghK_I1n5mBhbhy1GSNqH4r_TuYaDPXcjg',
+    rating: 4.7
+  }
+];
+
+export const INTERNATIONAL_DESTINATIONS: FeaturedDestination[] = [
+  {
+    id: 'bali',
+    name: 'Bali, Indonesia',
+    price: '₹45,000',
+    description: 'Tropical paradise for every mood.',
+    image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=2600&auto=format&fit=crop',
+    rating: 5.0,
+    isTopChoice: true,
+    pricePerPerson: true,
+    region: 'Asia'
+  },
+  {
+    id: 'dubai',
+    name: 'Dubai, UAE',
+    price: '₹55,000',
+    description: 'Shopping, Desert Safari, Luxury',
+    image: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.8,
+    region: 'Middle East'
+  },
+  {
+    id: 'paris',
+    name: 'Paris, France',
+    price: '₹89,000',
+    description: 'Romance, Art, Culture',
+    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.9,
+    region: 'Europe'
+  },
+  {
+    id: 'santorini',
+    name: 'Santorini, Greece',
+    price: '₹1,20,000',
+    description: 'White domes, blue seas, and sunsets.',
+    image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.9,
+    region: 'Europe'
+  },
+  {
+    id: 'tokyo',
+    name: 'Tokyo, Japan',
+    price: '₹1,05,000',
+    description: 'Neon lights, historic temples, and sushi.',
+    image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.8,
+    region: 'Asia'
+  },
+  {
+    id: 'newyork',
+    name: 'New York, USA',
+    price: '₹1,45,000',
+    description: 'The city that never sleeps.',
+    image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.7,
+    region: 'Americas'
+  },
+  {
+    id: 'maldives',
+    name: 'Maldives',
+    price: '₹75,000',
+    description: 'Overwater bungalows and turquoise lagoons.',
+    image: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?q=80&w=2600&auto=format&fit=crop',
+    rating: 5.0,
+    region: 'Asia'
+  },
+  {
+    id: 'rome',
+    name: 'Rome, Italy',
+    price: '₹92,000',
+    description: 'Ancient history and incredible pasta.',
+    image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.8,
+    region: 'Europe'
+  },
+  {
+    id: 'petra',
+    name: 'Petra, Jordan',
+    price: '₹85,000',
+    description: 'The Rose City, carved into pink sandstone cliffs.',
+    image: 'https://images.unsplash.com/photo-1580835150258-0062f6d0f176?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.9,
+    region: 'Middle East'
+  },
+  {
+    id: 'abudhabi',
+    name: 'Abu Dhabi, UAE',
+    price: '₹60,000',
+    description: 'Grand mosques, Louvre museum, and luxury islands.',
+    image: 'https://images.unsplash.com/photo-1546412414-8035e1776c9a?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.7,
+    region: 'Middle East'
+  },
+  {
+    id: 'rio',
+    name: 'Rio de Janeiro, Brazil',
+    price: '₹1,30,000',
+    description: 'Samba, Copacabana beach, and breathtaking views.',
+    image: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.8,
+    region: 'Americas'
+  },
+  {
+    id: 'banff',
+    name: 'Banff, Canada',
+    price: '₹1,50,000',
+    description: 'Turquoise lakes and majestic Rocky Mountains.',
+    image: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?q=80&w=2600&auto=format&fit=crop',
+    rating: 5.0,
+    region: 'Americas'
+  },
+  {
+    id: 'cancun',
+    name: 'Cancun, Mexico',
+    price: '₹1,15,000',
+    description: 'White sand beaches and Mayan ruins.',
+    image: 'https://images.unsplash.com/photo-1565439396260-143586c039d9?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.7,
+    region: 'Americas'
+  },
+  {
+    id: 'cairo',
+    name: 'Cairo, Egypt',
+    price: '₹72,000',
+    description: 'Home of the Giza Pyramids and the Sphinx.',
+    image: 'https://images.unsplash.com/photo-1539650116455-8ef84f0b097e?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.7,
+    region: 'Middle East'
+  },
+  {
+    id: 'kyoto',
+    name: 'Kyoto, Japan',
+    price: '₹1,10,000',
+    description: 'Famous Red Torii gates and bamboo forests.',
+    image: 'https://images.unsplash.com/photo-1478436127897-769e1b3f0f36?q=80&w=2600&auto=format&fit=crop',
+    rating: 4.8,
+    region: 'Asia'
+  }
+];
+
+export const BOOKING_TABS = [
+  { type: BookingType.FLIGHTS, icon: 'flight' },
+  { type: BookingType.HOTELS, icon: 'hotel' },
+  { type: BookingType.ACTIVITIES, icon: 'local_activity' }
+];
