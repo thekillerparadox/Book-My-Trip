@@ -77,138 +77,69 @@ export const INTERNATIONAL_DESTINATIONS: FeaturedDestination[] = [
     id: 'bali',
     name: 'Bali, Indonesia',
     price: '₹45,000',
-    description: 'Tropical paradise for every mood.',
+    description: 'A tropical sanctuary known for its forested volcanic mountains, iconic rice paddies, beaches, and coral reefs.',
     image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=2600&auto=format&fit=crop',
     rating: 5.0,
     isTopChoice: true,
     pricePerPerson: true,
-    region: 'Asia'
+    region: 'Asia',
+    bestTimeToVisit: 'April to October',
+    suggestedActivities: ['Uluwatu Temple Visit', 'Scuba Diving in Tulamben', 'Tegalalang Rice Terrace Trekking', 'Yoga in Ubud']
   },
   {
     id: 'dubai',
     name: 'Dubai, UAE',
     price: '₹55,000',
-    description: 'Shopping, Desert Safari, Luxury',
+    description: 'A city and emirate in the United Arab Emirates known for luxury shopping, ultramodern architecture, and a lively nightlife scene.',
     image: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?q=80&w=2600&auto=format&fit=crop',
     rating: 4.8,
-    region: 'Middle East'
+    region: 'Middle East',
+    bestTimeToVisit: 'November to March',
+    suggestedActivities: ['Burj Khalifa Observation Deck', 'Desert Safari with Dinner', 'Dubai Mall Shopping', 'Palm Jumeirah Helicopter Tour']
   },
   {
     id: 'paris',
     name: 'Paris, France',
     price: '₹89,000',
-    description: 'Romance, Art, Culture',
+    description: 'The global center for art, fashion, gastronomy, and culture. Its 19th-century cityscape is crisscrossed by wide boulevards and the River Seine.',
     image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2600&auto=format&fit=crop',
     rating: 4.9,
-    region: 'Europe'
+    region: 'Europe',
+    bestTimeToVisit: 'June to August or September to October',
+    suggestedActivities: ['Louvre Museum Tour', 'Eiffel Tower Picnic', 'Seine River Cruise', 'Montmartre Artists Walk']
   },
   {
     id: 'santorini',
     name: 'Santorini, Greece',
     price: '₹1,20,000',
-    description: 'White domes, blue seas, and sunsets.',
+    description: 'One of the Cyclades islands in the Aegean Sea. It was devastated by a volcanic eruption in the 16th century BC, forever shaping its rugged landscape.',
     image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=2600&auto=format&fit=crop',
     rating: 4.9,
-    region: 'Europe'
+    region: 'Europe',
+    bestTimeToVisit: 'September to October',
+    suggestedActivities: ['Oia Sunset Viewing', 'Volcano & Hot Springs Boat Tour', 'Wine Tasting', 'Fira to Oia Hike']
   },
   {
     id: 'tokyo',
     name: 'Tokyo, Japan',
     price: '₹1,05,000',
-    description: 'Neon lights, historic temples, and sushi.',
+    description: 'Japan’s busy capital, mixes the ultramodern and the traditional, from neon-lit skyscrapers to historic temples.',
     image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=2600&auto=format&fit=crop',
     rating: 4.8,
-    region: 'Asia'
+    region: 'Asia',
+    bestTimeToVisit: 'March to April (Cherry Blossom)',
+    suggestedActivities: ['Shibuya Crossing Visit', 'Tsukiji Outer Market Breakfast', 'TeamLab Borderless', 'Senso-ji Temple']
   },
   {
     id: 'newyork',
     name: 'New York, USA',
     price: '₹1,45,000',
-    description: 'The city that never sleeps.',
+    description: 'A city of five boroughs where the Hudson River meets the Atlantic Ocean. At its core is Manhattan, a densely populated borough that is among the world’s major centers.',
     image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=2600&auto=format&fit=crop',
     rating: 4.7,
-    region: 'Americas'
-  },
-  {
-    id: 'maldives',
-    name: 'Maldives',
-    price: '₹75,000',
-    description: 'Overwater bungalows and turquoise lagoons.',
-    image: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?q=80&w=2600&auto=format&fit=crop',
-    rating: 5.0,
-    region: 'Asia'
-  },
-  {
-    id: 'rome',
-    name: 'Rome, Italy',
-    price: '₹92,000',
-    description: 'Ancient history and incredible pasta.',
-    image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=2600&auto=format&fit=crop',
-    rating: 4.8,
-    region: 'Europe'
-  },
-  {
-    id: 'petra',
-    name: 'Petra, Jordan',
-    price: '₹85,000',
-    description: 'The Rose City, carved into pink sandstone cliffs.',
-    image: 'https://images.unsplash.com/photo-1580835150258-0062f6d0f176?q=80&w=2600&auto=format&fit=crop',
-    rating: 4.9,
-    region: 'Middle East'
-  },
-  {
-    id: 'abudhabi',
-    name: 'Abu Dhabi, UAE',
-    price: '₹60,000',
-    description: 'Grand mosques, Louvre museum, and luxury islands.',
-    image: 'https://images.unsplash.com/photo-1546412414-8035e1776c9a?q=80&w=2600&auto=format&fit=crop',
-    rating: 4.7,
-    region: 'Middle East'
-  },
-  {
-    id: 'rio',
-    name: 'Rio de Janeiro, Brazil',
-    price: '₹1,30,000',
-    description: 'Samba, Copacabana beach, and breathtaking views.',
-    image: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?q=80&w=2600&auto=format&fit=crop',
-    rating: 4.8,
-    region: 'Americas'
-  },
-  {
-    id: 'banff',
-    name: 'Banff, Canada',
-    price: '₹1,50,000',
-    description: 'Turquoise lakes and majestic Rocky Mountains.',
-    image: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?q=80&w=2600&auto=format&fit=crop',
-    rating: 5.0,
-    region: 'Americas'
-  },
-  {
-    id: 'cancun',
-    name: 'Cancun, Mexico',
-    price: '₹1,15,000',
-    description: 'White sand beaches and Mayan ruins.',
-    image: 'https://images.unsplash.com/photo-1565439396260-143586c039d9?q=80&w=2600&auto=format&fit=crop',
-    rating: 4.7,
-    region: 'Americas'
-  },
-  {
-    id: 'cairo',
-    name: 'Cairo, Egypt',
-    price: '₹72,000',
-    description: 'Home of the Giza Pyramids and the Sphinx.',
-    image: 'https://images.unsplash.com/photo-1539650116455-8ef84f0b097e?q=80&w=2600&auto=format&fit=crop',
-    rating: 4.7,
-    region: 'Middle East'
-  },
-  {
-    id: 'kyoto',
-    name: 'Kyoto, Japan',
-    price: '₹1,10,000',
-    description: 'Famous Red Torii gates and bamboo forests.',
-    image: 'https://images.unsplash.com/photo-1478436127897-769e1b3f0f36?q=80&w=2600&auto=format&fit=crop',
-    rating: 4.8,
-    region: 'Asia'
+    region: 'Americas',
+    bestTimeToVisit: 'April to June or September to November',
+    suggestedActivities: ['Central Park Biking', 'Broadway Show', 'Empire State Building', 'High Line Walk']
   }
 ];
 

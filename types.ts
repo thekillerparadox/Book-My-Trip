@@ -19,6 +19,8 @@ export interface FeaturedDestination extends Destination {
   tags?: string[];
   pricePerPerson?: boolean;
   region?: string;
+  bestTimeToVisit?: string;
+  suggestedActivities?: string[];
 }
 
 export interface HeroSlide {
@@ -33,3 +35,16 @@ export enum BookingType {
   HOTELS = 'Hotels',
   ACTIVITIES = 'Activities'
 }
+
+export interface Trip {
+  id: string;
+  destinationName: string;
+  image: string;
+  dates: string;
+  travelers: string;
+  price: string;
+  type: string;
+  bookedAt: number;
+}
+
+export type AppView = 'home' | 'trips';

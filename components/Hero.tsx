@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { HERO_SLIDES } from '../constants';
 import { BookingWidget } from './BookingWidget';
+import { Trip } from '../types';
 
-export const Hero: React.FC = () => {
+interface HeroProps {
+  onBook: (trip: Trip) => void;
+}
+
+export const Hero: React.FC<HeroProps> = ({ onBook }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 5000); // Change slide every 5 seconds
+    }, 5000);
 
     return () => clearInterval(timer);
   }, []);
@@ -28,7 +33,6 @@ export const Hero: React.FC = () => {
   return (
     <>
       <div className="relative w-full h-[650px] md:h-[750px] overflow-hidden bg-black">
-        {/* Carousel Backgrounds */}
         {HERO_SLIDES.map((slide, index) => (
           <div
             key={slide.id}
@@ -43,7 +47,6 @@ export const Hero: React.FC = () => {
           />
         ))}
 
-        {/* Carousel Content */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 max-w-[960px] mx-auto pt-10 pb-32">
           {HERO_SLIDES.map((slide, index) => (
             <div
@@ -63,7 +66,6 @@ export const Hero: React.FC = () => {
             </div>
           ))}
           
-          {/* Navigation Controls */}
           <div className="absolute inset-x-0 bottom-40 md:bottom-48 flex justify-center items-center gap-8 z-20">
              <button 
                onClick={prevSlide}
@@ -83,7 +85,6 @@ export const Hero: React.FC = () => {
                       ? 'w-8 bg-white'
                       : 'w-2 bg-white/50 hover:bg-white/80'
                   }`}
-                  aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
             </div>
@@ -98,7 +99,7 @@ export const Hero: React.FC = () => {
           </div>
         </div>
       </div>
-      <BookingWidget />
+      <BookingWidget onBook={onBook} />
     </>
   );
 };
