@@ -27,12 +27,12 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
       if (sortBy === 'rating') {
         return b.rating - a.rating;
       }
-      return 0; // maintain original order for 'default'
+      return 0; 
     });
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 340;
+      const scrollAmount = 480;
       scrollContainerRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
@@ -69,38 +69,93 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
     setSelectedDest(null);
   };
 
-  const handleAIAssist = async (mode: 'itinerary' | 'nearby') => {
+  const handleAISearch = async () => {
     if (!selectedDest) return;
     setAiLoading(true);
     setAiResponse(null);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      
-      if (mode === 'itinerary') {
-        const response = await ai.models.generateContent({
-          model: 'gemini-3-pro-preview',
-          contents: `Create a detailed 5-day luxury travel itinerary for ${selectedDest.name}. Include morning, afternoon, and evening activities.`,
-          config: {
-            thinkingConfig: { thinkingBudget: 32768 }
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Provide the latest travel requirements, news, and trending cultural tips for visiting ${selectedDest.name} in 2025. Include current weather conditions and event highlights.`,
+        config: {
+          tools: [{ googleSearch: {} }]
+        }
+      });
+      setAiResponse({ 
+        text: response.text || "No specific tips found.",
+        sources: response.candidates?.[0]?.groundingMetadata?.groundingChunks
+      });
+    } catch (e) {
+      console.error(e);
+      setAiResponse({ text: "Search assist failed." });
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleAIMaps = async () => {
+    if (!selectedDest) return;
+    setAiLoading(true);
+    setAiResponse(null);
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      let toolConfig = undefined;
+
+      // Leverage user location for better results if available
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+        });
+        toolConfig = {
+          retrievalConfig: {
+            latLng: {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            }
           }
-        });
-        setAiResponse({ text: response.text || "Sorry, I couldn't generate an itinerary right now." });
-      } else {
-        const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: `What are the top 5 highly-rated local restaurants and hidden gems near ${selectedDest.name}?`,
-          config: {
-            tools: [{ googleMaps: {} }]
-          }
-        });
-        setAiResponse({ 
-          text: response.text || "Looking up nearby places...",
-          sources: response.candidates?.[0]?.groundingMetadata?.groundingChunks
-        });
+        };
+      } catch (geoError) {
+        console.debug("Proceeding without geolocation context.");
       }
-    } catch (error) {
-      console.error(error);
-      setAiResponse({ text: "Error connecting to AI assistant." });
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: `Locate the top 5 highly-rated local restaurants and popular tourist hotspots near ${selectedDest.name}. Provide direct Google Maps links and summarize why they are unique.`,
+        config: {
+          tools: [{ googleMaps: {} }],
+          toolConfig
+        }
+      });
+      setAiResponse({ 
+        text: response.text || "Could not find map data.",
+        sources: response.candidates?.[0]?.groundingMetadata?.groundingChunks
+      });
+    } catch (e) {
+      console.error(e);
+      setAiResponse({ text: "Maps assist failed." });
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleAITinerary = async () => {
+    if (!selectedDest) return;
+    setAiLoading(true);
+    setAiResponse(null);
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-pro-preview',
+        contents: `Create a professional 7-day high-end itinerary for ${selectedDest.name}. Focus on unique cultural experiences, hidden culinary spots, and luxury logistics. Plan for a diverse range of activities.`,
+        config: {
+          thinkingConfig: { thinkingBudget: 32768 }
+        }
+      });
+      setAiResponse({ text: response.text || "Failed to generate itinerary." });
+    } catch (e) {
+      console.error(e);
+      setAiResponse({ text: "Complex AI assistant failed." });
     } finally {
       setAiLoading(false);
     }
@@ -124,7 +179,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
         contents: {
           parts: [
             { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
-            { text: `Modify this image of ${selectedDest.name}: ${editPrompt}. Maintain the core landmark structure.` }
+            { text: `Enhance and edit this travel photo of ${selectedDest.name} according to this request: ${editPrompt}. Maintain natural lighting and architectural integrity.` }
           ]
         }
       });
@@ -136,8 +191,8 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
         }
       }
     } catch (e) {
-      console.error("Image edit error", e);
-      alert("Could not process image edit.");
+      console.error(e);
+      alert("AI Magic Edit failed.");
     } finally {
       setAiLoading(false);
       setEditPrompt('');
@@ -145,46 +200,45 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
   };
 
   return (
-    <section className="w-full max-w-[1440px] mx-auto px-6 py-16 bg-white dark:bg-[#1a130c] md:rounded-3xl mb-16 overflow-hidden relative">
+    <section className="w-full max-w-[1440px] mx-auto px-6 py-20 border border-gray-100 dark:border-white/5 rounded-[3rem] glass-panel shadow-2xl relative">
       <div className="max-w-[1200px] mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-               <span className="material-symbols-outlined text-primary text-3xl">public</span>
-               <h2 className="text-3xl md:text-4xl font-black tracking-tight">International Gateway</h2>
+            <div className="flex items-center gap-4 mb-4">
+               <span className="material-symbols-outlined text-primary text-5xl">public</span>
+               <h2 className="text-4xl md:text-5xl font-bold tracking-tight font-display">International Gateway</h2>
             </div>
-            <p className="text-text-sec-light dark:text-text-sec-dark max-w-lg text-lg">
-              Explore our curated selection of top-rated destinations around the globe.
+            <p className="text-text-sec-light dark:text-text-sec-dark max-w-2xl text-lg leading-relaxed font-medium">
+              Explore 20 global hotspots curated by our AI travel concierge. From Balinese rice terraces to Parisian boulevards.
             </p>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-4">
             <button
               onClick={() => scroll('left')}
-              className="size-12 rounded-full border-2 border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors text-text-main-light dark:text-text-main-dark"
+              className="size-14 rounded-full border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center transition-all shadow-sm group active:scale-95"
             >
-              <span className="material-symbols-outlined">arrow_back</span>
+              <span className="material-symbols-outlined text-2xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
             </button>
             <button
               onClick={() => scroll('right')}
-              className="size-12 rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 flex items-center justify-center transition-colors shadow-lg"
+              className="size-14 rounded-full bg-primary text-white hover:bg-primary/90 flex items-center justify-center transition-all shadow-xl shadow-primary/30 group active:scale-95"
             >
-              <span className="material-symbols-outlined">arrow_forward</span>
+              <span className="material-symbols-outlined text-2xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </button>
           </div>
         </div>
 
-        {/* Filters & Sorting */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
           <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
             {regions.map((region) => (
               <button
                 key={region}
                 onClick={() => setActiveRegion(region)}
-                className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all whitespace-nowrap ${
+                className={`px-8 py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all whitespace-nowrap shadow-sm border ${
                   activeRegion === region
-                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                    : 'bg-gray-100 dark:bg-gray-800 text-text-sec-light dark:text-text-sec-dark hover:bg-gray-200 dark:hover:bg-gray-700'
+                    ? 'bg-primary text-white border-primary shadow-primary/20'
+                    : 'bg-white dark:bg-white/5 text-text-sec-light border-gray-100 dark:border-white/10 hover:border-primary/40'
                 }`}
               >
                 {region}
@@ -192,63 +246,67 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
-             <span className="text-xs font-black uppercase tracking-widest opacity-40">Sort By:</span>
-             <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-full">
-                <button 
-                  onClick={() => setSortBy('default')}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${sortBy === 'default' ? 'bg-white dark:bg-gray-700 shadow-sm text-primary' : 'text-text-sec-light'}`}
-                >
-                  Featured
-                </button>
-                <button 
-                  onClick={() => setSortBy('rating')}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${sortBy === 'rating' ? 'bg-white dark:bg-gray-700 shadow-sm text-primary' : 'text-text-sec-light'}`}
-                >
-                  Top Rated
-                </button>
-             </div>
+          <div className="flex items-center gap-4 bg-gray-50 dark:bg-white/5 p-1.5 rounded-xl border border-gray-100 dark:border-white/10 shadow-inner">
+             <button 
+                onClick={() => setSortBy('default')}
+                className={`px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${sortBy === 'default' ? 'bg-white dark:bg-gray-700 shadow-md text-primary' : 'text-text-sec-light/60'}`}
+             >
+                Top Picks
+             </button>
+             <button 
+                onClick={() => setSortBy('rating')}
+                className={`px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${sortBy === 'rating' ? 'bg-white dark:bg-gray-700 shadow-md text-primary' : 'text-text-sec-light/60'}`}
+             >
+                Highest Rated
+             </button>
           </div>
         </div>
 
         <div
           ref={scrollContainerRef}
-          className="flex overflow-x-auto gap-6 pb-12 hide-scrollbar snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0"
+          className="flex overflow-x-auto gap-8 pb-12 hide-scrollbar snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 scroll-smooth"
         >
           {filteredDestinations.map((dest) => (
             <div
               key={dest.id}
               onClick={() => setSelectedDest(dest)}
-              className="relative min-w-[300px] md:min-w-[340px] h-[480px] rounded-2xl overflow-hidden snap-center group cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500"
+              className="relative min-w-[320px] md:min-w-[440px] h-[550px] rounded-[2.5rem] overflow-hidden snap-center group cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-700 border border-transparent hover:border-primary/20"
             >
               <img
                 src={dest.image}
                 alt={dest.name}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-              <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/30 flex items-center gap-1">
-                 <span className="material-symbols-outlined text-yellow-400 text-sm filled">star</span>
-                 <span className="text-white text-sm font-bold">{dest.rating}</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-70 group-hover:opacity-85 transition-opacity duration-500"></div>
+              
+              <div className="absolute top-6 right-6 bg-white/20 backdrop-blur-xl px-4 py-2 rounded-xl border border-white/20 flex items-center gap-2 group-hover:bg-white group-hover:text-black transition-all">
+                 <span className="material-symbols-outlined text-yellow-400 text-base filled">star</span>
+                 <span className="text-sm font-bold">{dest.rating}</span>
               </div>
+
               {dest.isTopChoice && (
-                <div className="absolute top-4 left-4 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                <div className="absolute top-6 left-6 bg-primary text-white text-[9px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-full shadow-lg">
                   Top Choice
                 </div>
               )}
-              <div className="absolute bottom-0 left-0 w-full p-6 text-white translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                <span className="text-xs font-bold tracking-wider opacity-80 uppercase mb-1 block">{dest.region}</span>
-                <h3 className="text-2xl font-bold mb-2 leading-tight">{dest.name}</h3>
-                <p className="text-white/80 text-sm mb-4 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-                  {dest.description}
-                </p>
-                <div className="flex items-center justify-between mt-2 pt-4 border-t border-white/20">
+
+              <div className="absolute bottom-0 left-0 w-full p-10 text-white transform group-hover:-translate-y-2 transition-transform duration-700">
+                <span className="text-[9px] font-bold tracking-widest opacity-60 uppercase mb-3 block">{dest.region}</span>
+                <h3 className="text-4xl font-bold mb-5 tracking-tight font-display">{dest.name}</h3>
+                
+                <div className="flex flex-wrap gap-2 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                   {dest.suggestedActivities?.slice(0, 2).map(a => (
+                     <span key={a} className="text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-lg border border-white/10">{a}</span>
+                   ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-6 border-t border-white/10">
                    <div>
-                      <p className="text-xs opacity-70">Starting from</p>
-                      <p className="text-lg font-bold text-primary">{dest.price}</p>
+                      <p className="text-[9px] font-bold uppercase opacity-60 tracking-wider mb-1">Package Starts At</p>
+                      <p className="text-2xl font-bold text-white">{dest.price}</p>
                    </div>
-                   <div className="size-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
-                     <span className="material-symbols-outlined">arrow_outward</span>
+                   <div className="size-12 rounded-2xl bg-white text-black flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all transform group-hover:rotate-12 shadow-xl">
+                     <span className="material-symbols-outlined text-2xl">arrow_forward</span>
                    </div>
                 </div>
               </div>
@@ -258,157 +316,147 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
       </div>
 
       {selectedDest && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300">
-          <div 
-            className="absolute inset-0 bg-black/70 backdrop-blur-md" 
-            onClick={() => { setSelectedDest(null); setEditedImage(null); }}
-          />
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setSelectedDest(null); setAiResponse(null); setEditedImage(null); }} />
           
-          <div className="relative w-full max-w-6xl h-[90vh] bg-surface-light dark:bg-surface-dark rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-[1300px] h-full max-h-[90vh] bg-white dark:bg-[#12181F] rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 p-0 flex flex-col lg:flex-row">
             <button 
-              onClick={() => { setSelectedDest(null); setEditedImage(null); }}
-              className="absolute top-6 right-6 z-50 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors"
+              onClick={() => { setSelectedDest(null); setAiResponse(null); setEditedImage(null); }}
+              className="absolute top-6 right-6 z-50 size-12 bg-white/10 backdrop-blur-xl rounded-full text-white hover:bg-primary transition-all flex items-center justify-center group"
             >
-              <span className="material-symbols-outlined text-2xl">close</span>
+              <span className="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform">close</span>
             </button>
 
-            <div className="w-full md:w-5/12 h-64 md:h-auto relative group">
+            <div className="w-full lg:w-[40%] h-64 lg:h-auto relative">
                <img 
                  src={editedImage || selectedDest.image} 
                  alt={selectedDest.name}
                  className="w-full h-full object-cover"
                />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-               <div className="absolute bottom-10 left-10 text-white">
-                  <span className="text-xs font-black text-primary bg-white/10 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-[0.2em] mb-3 inline-block">Destination</span>
-                  <h2 className="text-5xl font-black tracking-tighter leading-none mb-2">{selectedDest.name}</h2>
-                  <div className="flex items-center gap-4 text-sm font-bold opacity-80">
-                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-lg filled text-yellow-400">star</span> {selectedDest.rating}</span>
-                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-lg">location_on</span> {selectedDest.region}</span>
-                  </div>
-               </div>
-
-               <div className="absolute top-24 left-10 right-10 bg-black/40 backdrop-blur-xl border border-white/10 p-4 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
-                  <label className="text-[10px] font-black uppercase text-white/60 mb-2 block tracking-widest">Magic Image Editor</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      value={editPrompt}
-                      onChange={(e) => setEditPrompt(e.target.value)}
-                      placeholder="Add a retro filter..."
-                      className="flex-1 bg-white/10 border-none rounded-lg text-white text-xs py-2 focus:ring-1 focus:ring-primary outline-none placeholder:text-white/30"
-                    />
-                    <button 
-                      onClick={handleEditImage}
-                      disabled={aiLoading}
-                      className="bg-primary text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase"
-                    >
-                      {aiLoading ? '...' : 'Edit'}
-                    </button>
+               <div className="absolute inset-0 bg-gradient-to-t from-[#12181F] via-transparent to-black/30" />
+               <div className="absolute bottom-10 left-10 right-10 text-white">
+                  <h2 className="text-5xl font-bold tracking-tight mb-6 font-display">{selectedDest.name}</h2>
+                  <div className="bg-black/30 backdrop-blur-xl border border-white/10 p-6 rounded-2xl">
+                     <div className="flex items-center gap-2 mb-3">
+                        <span className="material-symbols-outlined text-primary text-lg">auto_fix_high</span>
+                        <label className="text-[9px] font-bold uppercase text-white/50 tracking-widest">Nano Magic Edit</label>
+                     </div>
+                     <div className="flex gap-2">
+                       <input 
+                         type="text" 
+                         value={editPrompt}
+                         onChange={(e) => setEditPrompt(e.target.value)}
+                         placeholder="Describe a change..."
+                         className="flex-1 bg-white/5 border-none rounded-lg text-xs py-3 px-4 text-white focus:ring-1 focus:ring-primary placeholder:text-white/20"
+                       />
+                       <button 
+                         onClick={handleEditImage}
+                         disabled={aiLoading}
+                         className="bg-primary hover:bg-primary/90 text-white px-5 py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all"
+                       >
+                         {aiLoading ? '...' : 'Go'}
+                       </button>
+                     </div>
                   </div>
                </div>
             </div>
 
-            <div className="w-full md:w-7/12 p-8 md:p-14 overflow-y-auto custom-scrollbar flex flex-col">
-               <div className="flex items-center gap-8 mb-12">
+            <div className="w-full lg:w-[60%] p-8 lg:p-16 overflow-y-auto hide-scrollbar flex flex-col bg-white dark:bg-[#12181F]">
+               <div className="flex flex-wrap items-center gap-4 mb-12">
                   <button 
-                    onClick={() => handleAIAssist('itinerary')}
-                    className="flex flex-col items-center gap-2 group"
+                    onClick={handleAISearch}
+                    className="flex-1 min-w-[150px] flex items-center justify-center gap-3 h-14 bg-gray-50 dark:bg-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all border border-gray-100 dark:border-white/5"
                   >
-                    <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-lg shadow-primary/10">
-                       <span className="material-symbols-outlined text-3xl">auto_awesome</span>
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Plan Trip</span>
+                    <span className="material-symbols-outlined text-2xl">travel_explore</span>
+                    AI Search
                   </button>
                   <button 
-                    onClick={() => handleAIAssist('nearby')}
-                    className="flex flex-col items-center gap-2 group"
+                    onClick={handleAIMaps}
+                    className="flex-1 min-w-[150px] flex items-center justify-center gap-3 h-14 bg-gray-50 dark:bg-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all border border-gray-100 dark:border-white/5"
                   >
-                    <div className="size-14 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500 group-hover:bg-green-500 group-hover:text-white transition-all shadow-lg shadow-green-500/10">
-                       <span className="material-symbols-outlined text-3xl">map</span>
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Nearby</span>
+                    <span className="material-symbols-outlined text-2xl">pin_drop</span>
+                    Maps
+                  </button>
+                  <button 
+                    onClick={handleAITinerary}
+                    className="flex-1 min-w-[150px] flex items-center justify-center gap-3 h-14 bg-primary/10 text-primary rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all border border-primary/20"
+                  >
+                    <span className="material-symbols-outlined text-2xl">lightbulb_circle</span>
+                    Itinerary
                   </button>
                </div>
 
-               <div className="flex-1">
+               <div className="flex-1 min-h-0">
                   {aiLoading ? (
-                    <div className="py-20 flex flex-col items-center justify-center text-center animate-pulse">
-                      <div className="size-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-6"></div>
-                      <h4 className="text-xl font-bold">Consulting our AI Concierge...</h4>
-                      <p className="text-sm opacity-60 mt-2">Thinking hard to craft your perfect experience</p>
+                    <div className="h-full flex flex-col items-center justify-center text-center py-20">
+                      <div className="size-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-6"></div>
+                      <h4 className="text-xl font-bold tracking-tight mb-2 font-display">Generating Insights</h4>
+                      <p className="text-sm opacity-40 font-medium">Please wait while our AI synthesizes real-time travel data.</p>
                     </div>
                   ) : aiResponse ? (
-                    <div className="bg-gray-50 dark:bg-gray-900/50 p-8 rounded-3xl border border-gray-100 dark:border-white/5 animate-in slide-in-from-bottom-4 duration-500">
-                      <div className="flex items-center justify-between mb-6">
-                        <h4 className="text-xl font-bold">AI Recommendations</h4>
-                        <button onClick={() => setAiResponse(null)} className="text-xs font-bold text-primary">Clear</button>
+                    <div className="bg-gray-50 dark:bg-white/5 p-8 rounded-3xl border border-gray-100 dark:border-white/5 animate-in slide-in-from-bottom-6 duration-700">
+                      <div className="flex items-center justify-between mb-8">
+                         <h4 className="text-lg font-bold tracking-tight font-display">Concierge Insights</h4>
+                         <button onClick={() => setAiResponse(null)} className="text-[10px] font-bold uppercase tracking-widest text-primary opacity-60 hover:opacity-100">Clear</button>
                       </div>
-                      <div className="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
+                      <div className="text-sm leading-relaxed text-text-main-light/80 dark:text-text-main-dark/80 whitespace-pre-wrap mb-10">
                         {aiResponse.text}
                       </div>
-                      {aiResponse.sources && (
-                        <div className="mt-8 pt-6 border-t border-gray-100 dark:border-white/5">
-                          <h5 className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-50">Verified Places</h5>
-                          <div className="flex flex-wrap gap-2">
-                             {aiResponse.sources.map((src, i) => (
-                               src.maps && (
-                                 <a key={i} href={src.maps.uri} target="_blank" className="text-[10px] bg-primary/10 text-primary px-3 py-1.5 rounded-full font-bold hover:bg-primary hover:text-white transition-colors">
-                                   {src.maps.title || 'View on Maps'}
-                                 </a>
-                               )
-                             ))}
-                          </div>
+                      {aiResponse.sources && aiResponse.sources.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                           {aiResponse.sources.map((src, i) => (
+                             (src.maps || src.web) && (
+                               <a 
+                                 key={i} 
+                                 href={src.maps?.uri || src.web?.uri} 
+                                 target="_blank" 
+                                 className="px-4 py-2 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:text-primary transition-all flex items-center gap-2"
+                               >
+                                 <span className="material-symbols-outlined text-sm">{src.maps ? 'pin_drop' : 'language'}</span>
+                                 {src.maps?.title || src.web?.title || 'External Source'}
+                               </a>
+                             )
+                           ))}
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="space-y-8">
+                    <div className="space-y-12">
                        <div>
-                          <h4 className="text-[10px] font-black uppercase text-primary tracking-[0.3em] mb-4">The Experience</h4>
-                          <p className="text-2xl font-medium leading-tight text-text-main-light/90 dark:text-text-main-dark/90 italic">
+                          <h4 className="text-[10px] font-bold uppercase text-primary tracking-widest mb-4">The Experience</h4>
+                          <p className="text-2xl font-bold leading-relaxed tracking-tight font-display">
                              "{selectedDest.description}"
                           </p>
                        </div>
                        
-                       <div className="grid grid-cols-2 gap-8">
-                          <div>
-                             <h4 className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3">Best Visited In</h4>
-                             <p className="font-bold text-lg">{selectedDest.bestTimeToVisit}</p>
+                       <div className="grid grid-cols-2 gap-6">
+                          <div className="bg-gray-50 dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/5">
+                             <h4 className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-2">Best Time</h4>
+                             <p className="font-bold text-lg text-primary">{selectedDest.bestTimeToVisit}</p>
                           </div>
-                          <div>
-                             <h4 className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3">Expected Rating</h4>
-                             <div className="flex items-center gap-1">
-                               <span className="text-2xl font-black">{selectedDest.rating}</span>
-                               <span className="material-symbols-outlined text-yellow-400 filled">star</span>
+                          <div className="bg-gray-50 dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/5">
+                             <h4 className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-2">Rating</h4>
+                             <div className="flex items-center gap-2">
+                               <span className="text-lg font-bold">{selectedDest.rating}</span>
+                               <span className="material-symbols-outlined text-yellow-400 text-base filled">star</span>
                              </div>
-                          </div>
-                       </div>
-
-                       <div>
-                          <h4 className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4">Curated Highlights</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {selectedDest.suggestedActivities?.map(act => (
-                              <div key={act} className="px-5 py-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl text-xs font-bold border border-gray-100 dark:border-white/5">
-                                {act}
-                              </div>
-                            ))}
                           </div>
                        </div>
                     </div>
                   )}
                </div>
 
-               <div className="mt-12 pt-8 border-t border-gray-100 dark:border-white/5 flex items-center gap-6">
+               <div className="mt-12 pt-8 border-t border-gray-100 dark:border-white/5 flex flex-col md:flex-row md:items-center gap-8">
                   <div className="flex-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-1">Total Package</p>
-                    <p className="text-3xl font-black text-primary">{selectedDest.price}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-1">Total Package</p>
+                    <p className="text-4xl font-bold text-primary leading-none tracking-tight">{selectedDest.price}</p>
                   </div>
                   <button 
                     onClick={handleBooking}
-                    className="px-12 h-16 bg-primary text-white dark:text-background-dark rounded-2xl font-black uppercase tracking-widest shadow-2xl shadow-primary/30 hover:scale-[1.03] active:scale-[0.98] transition-all"
+                    className="flex-1 h-16 bg-primary text-white rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3"
                   >
                     Confirm Booking
+                    <span className="material-symbols-outlined text-2xl">verified</span>
                   </button>
                </div>
             </div>

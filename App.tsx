@@ -7,6 +7,8 @@ import { InternationalGateway } from './components/InternationalGateway';
 import { Newsletter } from './components/Newsletter';
 import { Footer } from './components/Footer';
 import { TripsSection } from './components/TripsSection';
+import { AIVisualizer } from './components/AIVisualizer';
+import { ReviewsSection } from './components/ReviewsSection';
 import { AppView, Trip } from './types';
 
 const App: React.FC = () => {
@@ -42,15 +44,21 @@ const App: React.FC = () => {
       <Navbar currentView={currentView} setView={setCurrentView} />
       <main className="w-full flex flex-col items-center min-h-[70vh]">
         {currentView === 'home' ? (
-          <>
+          <div className="w-full space-y-0 flex flex-col items-center">
             <Hero onBook={handleBookTrip} />
-            <MoodSection />
-            <TrendingSection />
-            <InternationalGateway onBook={handleBookTrip} />
-            <Newsletter />
-          </>
+            <div className="w-full flex flex-col items-center gap-8 md:gap-12">
+              <MoodSection />
+              <TrendingSection />
+              <AIVisualizer />
+              <InternationalGateway onBook={handleBookTrip} />
+              <ReviewsSection />
+              <Newsletter />
+            </div>
+          </div>
         ) : (
-          <TripsSection trips={trips} onRemove={handleRemoveTrip} onGoHome={() => setCurrentView('home')} />
+          <div className="pt-10 w-full flex justify-center">
+            <TripsSection trips={trips} onRemove={handleRemoveTrip} onGoHome={() => setCurrentView('home')} />
+          </div>
         )}
       </main>
       <Footer />
