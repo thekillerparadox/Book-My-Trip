@@ -60,6 +60,7 @@ export const Hero: React.FC<HeroProps> = ({ onBook }) => {
 
   return (
     <div 
+      id="flights"
       className="relative w-full select-none h-[600px] md:h-[700px]"
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}

@@ -82,4 +82,18 @@ export interface Review {
   response?: ReviewResponse;
 }
 
-export type AppView = 'home' | 'trips';
+export interface Guide {
+  id: string;
+  name: string;
+  location: string;
+  specialties: string[];
+  languages: string[];
+  rating: number;
+  reviewCount: number;
+  pricePerDay: string;
+  image: string;
+  bio: string;
+  verified: boolean;
+}
+
+export type AppView = 'home' | 'trips' | 'guides';

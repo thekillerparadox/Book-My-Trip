@@ -113,7 +113,7 @@ export const TrendingSection: React.FC = () => {
   }, []);
 
   return (
-    <section className="w-full max-w-[1200px] px-6 py-8 relative">
+    <section id="destinations" className="w-full max-w-[1200px] px-6 py-8 relative">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">

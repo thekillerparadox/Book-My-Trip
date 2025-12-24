@@ -3,12 +3,16 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { MoodSection } from './components/MoodSection';
 import { TrendingSection } from './components/TrendingSection';
+import { TripPlanner } from './components/TripPlanner';
 import { InternationalGateway } from './components/InternationalGateway';
+import { TourGuideSection } from './components/TourGuideSection';
 import { Newsletter } from './components/Newsletter';
 import { Footer } from './components/Footer';
 import { TripsSection } from './components/TripsSection';
 import { AIVisualizer } from './components/AIVisualizer';
 import { ReviewsSection } from './components/ReviewsSection';
+import { AccessibilityPanel } from './components/AccessibilityPanel';
+import { VoiceAssistant } from './components/VoiceAssistant';
 import { AppView, Trip } from './types';
 
 const App: React.FC = () => {
@@ -39,11 +43,19 @@ const App: React.FC = () => {
     localStorage.setItem('bmt_trips', JSON.stringify(updatedTrips));
   };
 
-  return (
-    <div className="w-full flex flex-col items-center">
-      <Navbar currentView={currentView} setView={setCurrentView} />
-      <main className="w-full flex flex-col items-center min-h-[100vh]">
-        {currentView === 'home' ? (
+  const renderContent = () => {
+    switch (currentView) {
+      case 'guides':
+        return <TourGuideSection onBook={handleBookTrip} />;
+      case 'trips':
+        return (
+          <div className="pt-24 w-full flex justify-center min-h-[60vh]">
+            <TripsSection trips={trips} onRemove={handleRemoveTrip} onGoHome={() => setCurrentView('home')} />
+          </div>
+        );
+      case 'home':
+      default:
+        return (
           <div className="w-full flex flex-col items-center">
             <Hero onBook={handleBookTrip} />
             {/* 
@@ -56,19 +68,28 @@ const App: React.FC = () => {
             <div className="w-full flex flex-col items-center gap-6 md:gap-8 mt-[330px] md:mt-[230px]">
               <MoodSection />
               <TrendingSection />
+              <TripPlanner onBook={handleBookTrip} />
               <AIVisualizer />
               <InternationalGateway onBook={handleBookTrip} />
               <ReviewsSection />
               <Newsletter />
             </div>
           </div>
-        ) : (
-          <div className="pt-24 w-full flex justify-center min-h-[60vh]">
-            <TripsSection trips={trips} onRemove={handleRemoveTrip} onGoHome={() => setCurrentView('home')} />
-          </div>
-        )}
+        );
+    }
+  };
+
+  return (
+    <div className="w-full flex flex-col items-center">
+      <Navbar currentView={currentView} setView={setCurrentView} />
+      <main className="w-full flex flex-col items-center min-h-[100vh]">
+        {renderContent()}
       </main>
       <Footer />
+      
+      {/* Accessibility Features */}
+      <AccessibilityPanel />
+      <VoiceAssistant setView={setCurrentView} />
     </div>
   );
 };

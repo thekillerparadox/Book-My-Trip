@@ -19,6 +19,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
   const [editPrompt, setEditPrompt] = useState('');
   const [editedImage, setEditedImage] = useState<string | null>(null);
   const [customTripTitle, setCustomTripTitle] = useState('');
+  const [isPlayingTTS, setIsPlayingTTS] = useState(false);
 
   const regions = ['All', ...Array.from(new Set(INTERNATIONAL_DESTINATIONS.map((d) => d.region))).filter(Boolean) as string[]];
 
@@ -71,6 +72,57 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
     alert(`${newTrip.tripTitle} has been added to your trips!`);
     setSelectedDest(null);
     setCustomTripTitle('');
+  };
+
+  const handleReadAloud = async () => {
+    if (!selectedDest || isPlayingTTS) return;
+    setIsPlayingTTS(true);
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const textToRead = `${selectedDest.name}. ${selectedDest.description}. Located in ${selectedDest.region}. The best time to visit is ${selectedDest.bestTimeToVisit}.`;
+      
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash-preview-tts",
+        contents: [{ parts: [{ text: textToRead }] }],
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: {
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
+          },
+        },
+      });
+
+      const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      if (audioData) {
+         // Decode Base64 to ArrayBuffer
+         const binaryString = atob(audioData);
+         const bytes = new Uint8Array(binaryString.length);
+         for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+         
+         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+         
+         // Manually decode PCM (Int16 to Float32)
+         const data16 = new Int16Array(bytes.buffer);
+         const float32 = new Float32Array(data16.length);
+         for (let i=0; i<data16.length; i++) float32[i] = data16[i] / 32768;
+         
+         const buffer = ctx.createBuffer(1, float32.length, 24000);
+         buffer.copyToChannel(float32, 0);
+
+         const source = ctx.createBufferSource();
+         source.buffer = buffer;
+         source.connect(ctx.destination);
+         source.start(0);
+         source.onended = () => setIsPlayingTTS(false);
+      } else {
+        setIsPlayingTTS(false);
+      }
+
+    } catch (e) {
+      console.error("TTS Failed", e);
+      setIsPlayingTTS(false);
+    }
   };
 
   const handleAISearch = async () => {
@@ -316,7 +368,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
           ))}
         </div>
       </div>
-      {/* Modal logic remains identical to previous version, content omitted for brevity as spacing changes are main focus. */}
+      
       {selectedDest && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setSelectedDest(null); setAiResponse(null); setEditedImage(null); setCustomTripTitle(''); }} />
@@ -424,7 +476,15 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
                     </div>
                   ) : (
                     <div className="space-y-12">
-                       <div>
+                       <div className="relative">
+                          <button 
+                            onClick={handleReadAloud}
+                            disabled={isPlayingTTS}
+                            className={`absolute -top-1 right-0 p-2 rounded-full border transition-all ${isPlayingTTS ? 'bg-primary text-white animate-pulse' : 'border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10'}`}
+                            title="Read Description Aloud"
+                          >
+                            <span className="material-symbols-outlined">{isPlayingTTS ? 'volume_up' : 'text_to_speech'}</span>
+                          </button>
                           <h4 className="text-[10px] font-bold uppercase text-primary tracking-widest mb-4">The Experience</h4>
                           <p className="text-2xl font-bold leading-relaxed tracking-tight font-display">
                              "{selectedDest.description}"
