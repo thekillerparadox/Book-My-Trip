@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { HERO_SLIDES } from '../constants';
 import { BookingWidget } from './BookingWidget';
 import { Trip } from '../types';
@@ -12,9 +12,8 @@ export const Hero: React.FC<HeroProps> = ({ onBook }) => {
   const [progress, setProgress] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
-  const videoRef = useRef<HTMLDivElement>(null);
-
-  const SLIDE_DURATION = 7000;
+  
+  const SLIDE_DURATION = 8000;
 
   useEffect(() => {
     if (isHovered) return;
@@ -37,8 +36,8 @@ export const Hero: React.FC<HeroProps> = ({ onBook }) => {
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const { clientX, clientY } = e;
     setMousePos({
-      x: (clientX / window.innerWidth - 0.5) * 30,
-      y: (clientY / window.innerHeight - 0.5) * 30,
+      x: (clientX / window.innerWidth - 0.5) * 2, // Standardized range -1 to 1
+      y: (clientY / window.innerHeight - 0.5) * 2,
     });
   }, []);
 
@@ -57,9 +56,11 @@ export const Hero: React.FC<HeroProps> = ({ onBook }) => {
     setProgress(0);
   };
 
+  const getNextSlideIndex = (offset: number) => (currentSlide + offset) % HERO_SLIDES.length;
+
   return (
     <div 
-      className="relative w-full select-none"
+      className="relative w-full select-none h-[600px] md:h-[700px]"
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
@@ -67,158 +68,191 @@ export const Hero: React.FC<HeroProps> = ({ onBook }) => {
         setMousePos({ x: 0, y: 0 });
       }}
     >
-      <div className="relative w-full h-[700px] md:h-[900px] overflow-hidden bg-background-dark">
-        {/* Cinematic Multi-layered Background */}
+      {/* Background & Content Container - Clipped */}
+      <div className="absolute inset-0 w-full h-full overflow-hidden bg-background-dark perspective-[2000px]">
+        
+        {/* Cinematic Background Layer */}
         {HERO_SLIDES.map((slide, index) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 w-full h-full transition-all duration-[1500ms] ease-in-out ${
-              index === currentSlide ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-110 z-0'
+            className={`absolute inset-0 w-full h-full transition-all duration-[1200ms] ease-out ${
+              index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
+            {/* Parallax Image Container */}
             <div 
-              className="w-full h-full relative transition-transform duration-1000 ease-out"
-              style={{ transform: `translate(${mousePos.x * -0.2}px, ${mousePos.y * -0.2}px)` }}
+              className="w-[110%] h-[110%] -left-[5%] -top-[5%] relative transition-transform duration-300 ease-out"
+              style={{ 
+                transform: index === currentSlide 
+                  ? `translate(${mousePos.x * -20}px, ${mousePos.y * -20}px) scale(1.05)` 
+                  : 'none'
+              }}
             >
               <img 
                 src={slide.image} 
                 alt={slide.title} 
-                className="w-full h-full object-cover brightness-[0.75] contrast-[1.05]"
+                className="w-full h-full object-cover brightness-[0.6] contrast-[1.15]"
                 loading={index === 0 ? "eager" : "lazy"}
               />
-              {/* Dynamic Overlay Gradients */}
-              <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-black/30"></div>
+              {/* Complex Gradients for Depth */}
+              <div className="absolute inset-0 bg-gradient-to-b from-background-dark/30 via-transparent to-background-dark/90"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-background-dark/60 via-transparent to-transparent"></div>
+              {/* Radial Vignette */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]"></div>
             </div>
           </div>
         ))}
 
-        {/* HUD Layer (Interactive Data) */}
-        <div className="relative z-30 h-full flex flex-col items-center justify-center text-center px-6 max-w-[1440px] mx-auto pb-40">
+        {/* Main Content Layer - Moved Up */}
+        <div className="relative z-30 h-full max-w-[1440px] mx-auto px-6 flex flex-col justify-start pt-[12vh] md:pt-[18vh]">
+          
           {HERO_SLIDES.map((slide, index) => (
             <div
               key={slide.id}
-              className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-4 transition-all duration-1000 ease-out flex flex-col items-center ${
+              className={`absolute top-[40%] left-6 md:left-20 transform -translate-y-1/2 w-full max-w-4xl transition-all duration-1000 ${
                 index === currentSlide
-                  ? 'opacity-100 translate-y-[-55%]'
-                  : 'opacity-0 translate-y-[-40%] pointer-events-none'
+                  ? 'opacity-100 translate-x-0 blur-0'
+                  : 'opacity-0 -translate-x-20 blur-sm pointer-events-none'
               }`}
             >
-              {/* Animated Destination HUD */}
-              <div className="flex items-center gap-4 mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
-                <div className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white flex items-center gap-2">
-                  <span className="material-symbols-outlined text-sm text-primary filled">verified</span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{slide.tag}</span>
-                </div>
-                <div className="px-4 py-1.5 rounded-full bg-primary text-white flex items-center gap-2 shadow-lg shadow-primary/20">
-                  <span className="material-symbols-outlined text-sm filled">trending_up</span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest">{slide.stats.popularity} Demand</span>
-                </div>
+              {/* Interactive Badges */}
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                 <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full flex items-center gap-2 text-white shadow-xl animate-in fade-in slide-in-from-left-4 duration-700">
+                    <span className="material-symbols-outlined text-accent text-xs filled">local_fire_department</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">{slide.tag}</span>
+                 </div>
+                 
+                 <div className="bg-primary/80 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 text-white shadow-xl shadow-primary/20 animate-in fade-in slide-in-from-left-4 duration-700 delay-100">
+                    <span className="material-symbols-outlined text-xs">trending_up</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Trending Now</span>
+                 </div>
               </div>
 
-              <h1 className="text-white text-5xl md:text-8xl lg:text-9xl font-bold leading-[0.9] tracking-tighter mb-8 font-display drop-shadow-2xl max-w-6xl">
+              {/* Parallax Typography */}
+              <h1 
+                className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-6 drop-shadow-2xl transition-transform duration-100 ease-out"
+                style={{ transform: `translateX(${mousePos.x * 10}px)` }}
+              >
                 {slide.title}
               </h1>
 
-              <p className="text-white/90 text-lg md:text-2xl font-medium max-w-3xl mb-12 drop-shadow-md leading-relaxed opacity-80">
+              <p 
+                className="text-lg md:text-xl text-white/80 font-medium max-w-2xl leading-relaxed mb-8 drop-shadow-lg transition-transform duration-100 ease-out"
+                style={{ transform: `translateX(${mousePos.x * 5}px)` }}
+              >
                 {slide.subtitle}
               </p>
 
-              {/* Data Strip HUD - Fully Translucent Polish */}
-              <div className="flex flex-wrap justify-center gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-                <div className="bg-white/10 backdrop-blur-2xl px-8 py-4 rounded-3xl flex flex-col items-start gap-1 border border-white/20 hover:bg-white/20 transition-all group cursor-help shadow-lg shadow-black/20">
-                   <div className="flex items-center gap-2">
-                     <span className="material-symbols-outlined text-primary text-xl">thermostat</span>
-                     <span className="text-[9px] font-bold uppercase tracking-widest text-white/60">Current Temp</span>
-                   </div>
-                   <span className="text-xl font-bold text-white tracking-tight">{slide.stats.temp}</span>
-                </div>
-                
-                <div className="bg-primary/10 backdrop-blur-2xl px-8 py-4 rounded-3xl flex flex-col items-start gap-1 border border-primary/30 hover:bg-primary/20 transition-all shadow-lg shadow-primary/10">
-                   <div className="flex items-center gap-2">
-                     <span className="material-symbols-outlined text-primary text-xl">local_activity</span>
-                     <span className="text-[9px] font-bold uppercase tracking-widest text-primary/80">Must Experience</span>
-                   </div>
-                   <span className="text-xl font-bold text-white tracking-tight">{slide.stats.activity}</span>
-                </div>
+              {/* Data Widgets */}
+              <div className="flex flex-wrap gap-3 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+                 {/* Weather Widget */}
+                 <div className="bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center gap-3 hover:bg-white/10 transition-colors group cursor-default">
+                    <div className="size-8 rounded-full bg-yellow-400/20 flex items-center justify-center text-yellow-400 group-hover:scale-110 transition-transform">
+                       <span className="material-symbols-outlined text-lg">wb_sunny</span>
+                    </div>
+                    <div>
+                       <p className="text-[9px] font-bold uppercase text-white/40 tracking-widest">Weather</p>
+                       <p className="text-lg font-bold text-white">{slide.stats.temp}</p>
+                    </div>
+                 </div>
 
-                <div className="bg-white/10 backdrop-blur-2xl px-8 py-4 rounded-3xl flex flex-col items-start gap-1 border border-white/20 hover:bg-white/20 transition-all shadow-lg shadow-black/20">
-                   <div className="flex items-center gap-2">
-                     <span className="material-symbols-outlined text-primary text-xl">calendar_month</span>
-                     <span className="text-[9px] font-bold uppercase tracking-widest text-white/60">Best Status</span>
-                   </div>
-                   <span className="text-xl font-bold text-white tracking-tight">Available Now</span>
-                </div>
+                 {/* Activity Widget */}
+                 <div className="bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center gap-3 hover:bg-white/10 transition-colors group cursor-default">
+                    <div className="size-8 rounded-full bg-accent/20 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
+                       <span className="material-symbols-outlined text-lg">directions_run</span>
+                    </div>
+                    <div>
+                       <p className="text-[9px] font-bold uppercase text-white/40 tracking-widest">Top Activity</p>
+                       <p className="text-lg font-bold text-white">{slide.stats.activity}</p>
+                    </div>
+                 </div>
+
+                 {/* Popularity Widget */}
+                 <div className="bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center gap-3 hover:bg-white/10 transition-colors group cursor-default">
+                    <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                       <span className="material-symbols-outlined text-lg">equalizer</span>
+                    </div>
+                    <div>
+                       <p className="text-[9px] font-bold uppercase text-white/40 tracking-widest">Demand</p>
+                       <p className="text-lg font-bold text-white">{slide.stats.popularity}</p>
+                    </div>
+                 </div>
               </div>
             </div>
           ))}
+        </div>
 
-          {/* New Interactive Progress HUD */}
-          <div className="absolute inset-x-0 bottom-48 flex justify-center items-center gap-12 z-40">
-             <button 
-               onClick={prevSlide}
-               className="size-16 rounded-full border border-white/10 text-white/40 hover:bg-white hover:text-background-dark hover:border-white transition-all backdrop-blur-md flex items-center justify-center group active:scale-90"
-             >
-               <span className="material-symbols-outlined text-3xl group-hover:-translate-x-1 transition-transform">chevron_left</span>
-             </button>
-             
-             <div className="flex gap-4 items-end h-12">
-              {HERO_SLIDES.map((slide, index) => (
-                <div key={slide.id} className="relative flex flex-col items-center">
-                   {index === currentSlide && (
-                     <div className="absolute -top-8 text-[10px] font-bold text-primary animate-pulse whitespace-nowrap uppercase tracking-widest">
-                       {index + 1} / {HERO_SLIDES.length}
-                     </div>
-                   )}
-                   <button
-                    onClick={() => goToSlide(index)}
-                    className="relative group h-12 w-1.5"
-                    aria-label={`Go to slide ${index + 1}`}
-                  >
-                    <div className={`w-full h-full rounded-full transition-all duration-500 overflow-hidden ${
-                      index === currentSlide ? 'bg-white/20' : 'bg-white/10 hover:bg-white/30'
-                    }`}>
-                      {index === currentSlide && (
-                        <div 
-                          className="w-full bg-primary shadow-[0_0_20px_#359EFF] absolute bottom-0 transition-all duration-[100ms]"
-                          style={{ height: `${progress}%` }}
-                        ></div>
-                      )}
+        {/* Right Side - Interactive Navigation Deck */}
+        <div className="absolute bottom-56 md:bottom-24 right-6 md:right-20 z-40 flex flex-col gap-3 items-end">
+           {/* Next Slide Preview Card */}
+           <div 
+             className="hidden md:block w-56 h-28 bg-black/20 backdrop-blur-xl rounded-2xl p-3 border border-white/10 shadow-2xl hover:scale-105 transition-all cursor-pointer group relative overflow-hidden"
+             onClick={nextSlide}
+           >
+              <div className="absolute inset-0 w-full h-full">
+                 <img 
+                   src={HERO_SLIDES[getNextSlideIndex(1)].image} 
+                   alt="Next" 
+                   className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent"></div>
+              </div>
+              <div className="absolute bottom-3 left-3 right-3">
+                 <p className="text-[9px] font-bold uppercase text-accent tracking-widest mb-1">Up Next</p>
+                 <p className="text-white font-bold text-base leading-tight truncate">{HERO_SLIDES[getNextSlideIndex(1)].title}</p>
+                 <div className="flex justify-between items-center mt-2">
+                    <div className="h-0.5 w-full bg-white/20 rounded-full overflow-hidden">
+                       <div 
+                         className="h-full bg-accent transition-all duration-[16ms]" 
+                         style={{ width: `${progress}%` }}
+                       ></div>
                     </div>
-                  </button>
-                </div>
-              ))}
-            </div>
+                 </div>
+              </div>
+           </div>
 
-            <button 
-               onClick={nextSlide}
-               className="size-16 rounded-full border border-white/10 text-white/40 hover:bg-white hover:text-background-dark hover:border-white transition-all backdrop-blur-md flex items-center justify-center group active:scale-90"
-             >
-               <span className="material-symbols-outlined text-3xl group-hover:translate-x-1 transition-transform">chevron_right</span>
-             </button>
-          </div>
-        </div>
+           {/* Slide Indicators */}
+           <div className="flex gap-2">
+              <button 
+                onClick={prevSlide}
+                className="size-10 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all active:scale-95"
+              >
+                 <span className="material-symbols-outlined text-lg">arrow_back</span>
+              </button>
+              
+              <div className="h-10 bg-black/20 border border-white/10 rounded-full px-3 flex items-center gap-2 backdrop-blur-md hidden md:flex">
+                 {HERO_SLIDES.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => goToSlide(i)}
+                      className={`h-1 rounded-full transition-all duration-300 ${
+                        i === currentSlide 
+                          ? 'w-6 bg-primary shadow-[0_0_10px_rgba(99,102,241,0.5)]' 
+                          : 'w-1 bg-white/20 hover:bg-white/50'
+                      }`}
+                    />
+                 ))}
+              </div>
 
-        {/* Ambient Foreground Layer */}
-        <div className="absolute bottom-40 left-1/2 -translate-x-1/2 z-30 opacity-20 animate-bounce">
-           <span className="material-symbols-outlined text-white text-4xl">keyboard_double_arrow_down</span>
+              <button 
+                onClick={nextSlide}
+                className="size-10 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all active:scale-95"
+              >
+                 <span className="material-symbols-outlined text-lg">arrow_forward</span>
+              </button>
+           </div>
         </div>
+        
       </div>
-      
-      {/* Dynamic Booking HUD Bridge */}
-      <div className="w-full flex justify-center -translate-y-24 relative z-50 px-4">
-        <div 
-          className="w-full max-w-[1200px] transition-all duration-700"
-          style={{ 
-            transform: `perspective(2000px) rotateX(${mousePos.y * 0.05}deg) rotateY(${mousePos.x * -0.05}deg)`,
-            filter: isHovered ? 'drop-shadow(0 30px 60px rgba(53, 158, 255, 0.15))' : 'none'
-          }}
-        >
-          <div className="relative group/booking">
-             <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-accent/20 rounded-[2.5rem] blur opacity-0 group-hover/booking:opacity-100 transition duration-1000"></div>
-             <BookingWidget onBook={onBook} />
-          </div>
-        </div>
+
+      {/* Bottom Booking Widget Container - Absolute Positioned */}
+      <div className="absolute bottom-0 left-0 right-0 z-[60] px-4 translate-y-[75%]">
+         {/* Reduced max-width for a more compact card */}
+         <div className="max-w-[950px] mx-auto">
+           <div className="relative group/booking perspective-[1000px]">
+              <BookingWidget onBook={onBook} />
+           </div>
+         </div>
       </div>
     </div>
   );

@@ -37,6 +37,7 @@ export interface HeroSlide {
     popularity: string;
     activity: string;
   };
+  topics: string[]; // Added for Topic Highlights
 }
 
 export enum BookingType {
@@ -54,6 +55,7 @@ export interface Trip {
   price: string;
   type: string;
   bookedAt: number;
+  tripTitle?: string; // New field for custom trip name
 }
 
 export interface ReviewResponse {

@@ -15,20 +15,36 @@
         theme: {
           extend: {
             colors: {
-              primary: "#359EFF",
-              accent: "#FF6B6B",
-              "background-light": "#F8FAFC",
-              "background-dark": "#0A0C10",
-              "surface-light": "#ffffff",
-              "surface-dark": "#161B22",
-              "text-main-light": "#0F172A",
-              "text-main-dark": "#F8FAFC",
-              "text-sec-light": "#475569",
-              "text-sec-dark": "#94A3B8"
+              primary: "#6366F1", // Indigo 500
+              secondary: "#8B5CF6", // Violet 500
+              accent: "#F43F5E", // Rose 500
+              "background-light": "#F8FAFC", // Slate 50
+              "background-dark": "#020617", // Slate 950
+              "surface-light": "#FFFFFF",
+              "surface-dark": "#0F172A", // Slate 900
+              "text-main-light": "#1E293B", // Slate 800
+              "text-main-dark": "#F1F5F9", // Slate 100
+              "text-sec-light": "#64748B", // Slate 500
+              "text-sec-dark": "#94A3B8"  // Slate 400
             },
             fontFamily: {
               sans: ["Inter", "sans-serif"],
               display: ["Plus Jakarta Sans", "sans-serif"]
+            },
+            animation: {
+              'float': 'float 6s ease-in-out infinite',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'shimmer': 'shimmer 2s linear infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              },
+              shimmer: {
+                'from': { backgroundPosition: '0 0' },
+                'to': { backgroundPosition: '-200% 0' },
+              }
             }
           }
         }
@@ -50,26 +66,31 @@
         }
         
         body {
-          background-image: radial-gradient(at 0% 0%, hsla(210,100%,98%,1) 0, transparent 50%), 
-                            radial-gradient(at 100% 0%, hsla(210,100%,97%,1) 0, transparent 50%);
+          background-color: #F8FAFC;
+          background-image: 
+            radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 25%),
+            radial-gradient(circle at 85% 30%, rgba(244, 63, 94, 0.08) 0%, transparent 25%);
           background-attachment: fixed;
         }
         
         .dark body {
-          background-image: radial-gradient(at 0% 0%, hsla(210,40%,10%,1) 0, transparent 50%), 
-                            radial-gradient(at 100% 0%, hsla(220,40%,8%,1) 0, transparent 50%);
+          background-color: #020617;
+          background-image: 
+            radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.2) 0%, transparent 50%),
+            radial-gradient(circle at 0% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 100% 50%, rgba(244, 63, 94, 0.15) 0%, transparent 50%);
         }
 
         .glass-panel {
-          background: rgba(255, 255, 255, 0.75);
+          background: rgba(255, 255, 255, 0.85);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.6);
         }
 
         .dark .glass-panel {
-          background: rgba(22, 27, 34, 0.75);
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          background: rgba(15, 23, 42, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 <script type="importmap">

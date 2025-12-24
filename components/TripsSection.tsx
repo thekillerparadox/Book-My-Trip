@@ -67,9 +67,16 @@ export const TripsSection: React.FC<TripsSectionProps> = ({ trips, onRemove, onG
                 </button>
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">{trip.destinationName}</h3>
+                <h3 className="text-xl font-bold mb-1 truncate" title={trip.tripTitle || trip.destinationName}>
+                   {trip.tripTitle || trip.destinationName}
+                </h3>
+                {trip.tripTitle && (
+                  <p className="text-xs font-medium text-text-sec-light dark:text-text-sec-dark opacity-60 mb-2 truncate">
+                    {trip.destinationName}
+                  </p>
+                )}
                 
-                <div className="space-y-3 mb-6">
+                <div className="space-y-3 mb-6 mt-3">
                   <div className="flex items-center gap-3 text-sm text-text-sec-light">
                     <span className="material-symbols-outlined text-lg">calendar_month</span>
                     <span className="font-medium">{trip.dates}</span>

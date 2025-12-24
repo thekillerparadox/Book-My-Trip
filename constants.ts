@@ -7,7 +7,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     title: 'Majestic Taj Mahal',
     subtitle: 'Witness the eternal symbol of love at sunrise, a true architectural marvel.',
     tag: 'Eternal Heritage',
-    stats: { temp: '28°C', popularity: 'High', activity: 'Photography' }
+    stats: { temp: '28°C', popularity: 'High', activity: 'Photography' },
+    topics: ['History', 'Architecture', 'Romance', 'Iconic']
   },
   {
     id: 2,
@@ -15,7 +16,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     title: 'Swiss Alps Majesty',
     subtitle: 'Glide through crystal-clear skies above snow-capped peaks in the heart of Europe.',
     tag: 'Luxury Escapes',
-    stats: { temp: '-4°C', popularity: 'Peak', activity: 'Skiing' }
+    stats: { temp: '-4°C', popularity: 'Peak', activity: 'Skiing' },
+    topics: ['Nature', 'Winter Sports', 'Panorama', 'Luxury']
   },
   {
     id: 3,
@@ -23,7 +25,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     title: 'Ladakh High Passes',
     subtitle: 'Navigate the highest motorable roads and find peace in ancient monasteries.',
     tag: 'Adventure Wild',
-    stats: { temp: '12°C', popularity: 'Medium', activity: 'Biking' }
+    stats: { temp: '12°C', popularity: 'Medium', activity: 'Biking' },
+    topics: ['Adventure', 'Mountains', 'Spirituality', 'Road Trip']
   },
   {
     id: 4,
@@ -31,7 +34,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     title: 'Parisian Nights',
     subtitle: 'Walk the illuminated boulevards and experience the romance of the City of Light.',
     tag: 'Cultural Bliss',
-    stats: { temp: '16°C', popularity: 'High', activity: 'Dining' }
+    stats: { temp: '16°C', popularity: 'High', activity: 'Dining' },
+    topics: ['Art', 'Fashion', 'Gastronomy', 'Romance']
   },
   {
     id: 5,
@@ -39,7 +43,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     title: 'Bali Sanctuary',
     subtitle: 'Find your zen among emerald rice terraces and tropical island shores.',
     tag: 'Tropical Zen',
-    stats: { temp: '30°C', popularity: 'Trending', activity: 'Meditation' }
+    stats: { temp: '30°C', popularity: 'Trending', activity: 'Meditation' },
+    topics: ['Wellness', 'Nature', 'Culture', 'Beaches']
   },
   {
     id: 6,
@@ -47,7 +52,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     title: 'Golden Kyoto',
     subtitle: 'Step back in time through bamboo forests and historic Zen gardens.',
     tag: 'Eastern Spirit',
-    stats: { temp: '14°C', popularity: 'Steady', activity: 'Tea Ritual' }
+    stats: { temp: '14°C', popularity: 'Steady', activity: 'Tea Ritual' },
+    topics: ['History', 'Zen', 'Nature', 'Tradition']
   },
   {
     id: 7,
@@ -55,7 +61,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     title: 'Santorini Sunsets',
     subtitle: 'Overlook the deep blue Aegean from the iconic white-washed cliffs of Oia.',
     tag: 'Romantic Aegean',
-    stats: { temp: '24°C', popularity: 'Peak', activity: 'Sailing' }
+    stats: { temp: '24°C', popularity: 'Peak', activity: 'Sailing' },
+    topics: ['Views', 'Sea', 'Romance', 'Relaxation']
   },
   {
     id: 8,
@@ -63,7 +70,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     title: 'Future Dubai',
     subtitle: 'Experience ultra-modern luxury where desert dunes meet architectural miracles.',
     tag: 'Modern Luxury',
-    stats: { temp: '34°C', popularity: 'High', activity: 'Shopping' }
+    stats: { temp: '34°C', popularity: 'High', activity: 'Shopping' },
+    topics: ['Luxury', 'Desert', 'Shopping', 'Architecture']
   },
   {
     id: 9,
@@ -71,7 +79,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     title: 'Canal Venice',
     subtitle: 'Navigate the world\'s most beautiful water corridors in a traditional gondola.',
     tag: 'Historic Water',
-    stats: { temp: '18°C', popularity: 'High', activity: 'Gondola' }
+    stats: { temp: '18°C', popularity: 'High', activity: 'Gondola' },
+    topics: ['Romance', 'History', 'Canals', 'Art']
   },
   {
     id: 10,
@@ -79,7 +88,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     title: 'Maldives Crystal',
     subtitle: 'Dine underwater and sleep above the waves in pristine island lagoons.',
     tag: 'Ocean Paradise',
-    stats: { temp: '29°C', popularity: 'Exclusive', activity: 'Diving' }
+    stats: { temp: '29°C', popularity: 'Exclusive', activity: 'Diving' },
+    topics: ['Beaches', 'Luxury', 'Ocean', 'Honeymoon']
   }
 ];
 

@@ -42,11 +42,18 @@ const App: React.FC = () => {
   return (
     <div className="w-full flex flex-col items-center">
       <Navbar currentView={currentView} setView={setCurrentView} />
-      <main className="w-full flex flex-col items-center min-h-[70vh]">
+      <main className="w-full flex flex-col items-center min-h-[100vh]">
         {currentView === 'home' ? (
-          <div className="w-full space-y-0 flex flex-col items-center">
+          <div className="w-full flex flex-col items-center">
             <Hero onBook={handleBookTrip} />
-            <div className="w-full flex flex-col items-center gap-8 md:gap-12">
+            {/* 
+                Margin top calculation:
+                Mobile: Widget moved to 75% out. Widget height approx 370px. 0.75*370 = 277px. 
+                        mt-[330px] gives ~50px buffer.
+                Desktop: Widget moved to 75% out. Widget height approx 250px. 0.75*250 = 188px.
+                        mt-[230px] gives ~40px buffer.
+            */}
+            <div className="w-full flex flex-col items-center gap-6 md:gap-8 mt-[330px] md:mt-[230px]">
               <MoodSection />
               <TrendingSection />
               <AIVisualizer />
@@ -56,7 +63,7 @@ const App: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="pt-10 w-full flex justify-center">
+          <div className="pt-24 w-full flex justify-center min-h-[60vh]">
             <TripsSection trips={trips} onRemove={handleRemoveTrip} onGoHome={() => setCurrentView('home')} />
           </div>
         )}

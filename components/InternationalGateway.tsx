@@ -18,6 +18,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
   const [aiResponse, setAiResponse] = useState<{ text: string; sources?: any[] } | null>(null);
   const [editPrompt, setEditPrompt] = useState('');
   const [editedImage, setEditedImage] = useState<string | null>(null);
+  const [customTripTitle, setCustomTripTitle] = useState('');
 
   const regions = ['All', ...Array.from(new Set(INTERNATIONAL_DESTINATIONS.map((d) => d.region))).filter(Boolean) as string[]];
 
@@ -46,6 +47,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
         setSelectedDest(null);
         setAiResponse(null);
         setEditedImage(null);
+        setCustomTripTitle('');
       }
     };
     window.addEventListener('keydown', handleEsc);
@@ -57,6 +59,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
     const newTrip: Trip = {
       id: Math.random().toString(36).substr(2, 9),
       destinationName: selectedDest.name,
+      tripTitle: customTripTitle || selectedDest.name,
       image: editedImage || selectedDest.image,
       dates: 'Flexible dates chosen',
       travelers: '2 Adults',
@@ -65,8 +68,9 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
       bookedAt: Date.now()
     };
     onBook(newTrip);
-    alert(`${selectedDest.name} has been added to your trips!`);
+    alert(`${newTrip.tripTitle} has been added to your trips!`);
     setSelectedDest(null);
+    setCustomTripTitle('');
   };
 
   const handleAISearch = async () => {
@@ -101,8 +105,6 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       let toolConfig = undefined;
-
-      // Leverage user location for better results if available
       try {
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
@@ -200,42 +202,42 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
   };
 
   return (
-    <section className="w-full max-w-[1440px] mx-auto px-6 py-20 border border-gray-100 dark:border-white/5 rounded-[3rem] glass-panel shadow-2xl relative">
+    <section className="w-full max-w-[1440px] mx-auto px-6 py-8 border border-gray-100 dark:border-white/5 rounded-[2.5rem] glass-panel shadow-2xl relative">
       <div className="max-w-[1200px] mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
           <div>
-            <div className="flex items-center gap-4 mb-4">
-               <span className="material-symbols-outlined text-primary text-5xl">public</span>
-               <h2 className="text-4xl md:text-5xl font-bold tracking-tight font-display">International Gateway</h2>
+            <div className="flex items-center gap-3 mb-2">
+               <span className="material-symbols-outlined text-primary text-4xl">public</span>
+               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-display">International Gateway</h2>
             </div>
-            <p className="text-text-sec-light dark:text-text-sec-dark max-w-2xl text-lg leading-relaxed font-medium">
+            <p className="text-text-sec-light dark:text-text-sec-dark max-w-2xl text-sm md:text-base leading-relaxed font-medium">
               Explore 20 global hotspots curated by our AI travel concierge. From Balinese rice terraces to Parisian boulevards.
             </p>
           </div>
           
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <button
               onClick={() => scroll('left')}
-              className="size-14 rounded-full border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center transition-all shadow-sm group active:scale-95"
+              className="size-12 rounded-full border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center transition-all shadow-sm group active:scale-95"
             >
-              <span className="material-symbols-outlined text-2xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
+              <span className="material-symbols-outlined text-xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
             </button>
             <button
               onClick={() => scroll('right')}
-              className="size-14 rounded-full bg-primary text-white hover:bg-primary/90 flex items-center justify-center transition-all shadow-xl shadow-primary/30 group active:scale-95"
+              className="size-12 rounded-full bg-primary text-white hover:bg-primary/90 flex items-center justify-center transition-all shadow-xl shadow-primary/30 group active:scale-95"
             >
-              <span className="material-symbols-outlined text-2xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              <span className="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </button>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
-          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
             {regions.map((region) => (
               <button
                 key={region}
                 onClick={() => setActiveRegion(region)}
-                className={`px-8 py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all whitespace-nowrap shadow-sm border ${
+                className={`px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all whitespace-nowrap shadow-sm border ${
                   activeRegion === region
                     ? 'bg-primary text-white border-primary shadow-primary/20'
                     : 'bg-white dark:bg-white/5 text-text-sec-light border-gray-100 dark:border-white/10 hover:border-primary/40'
@@ -246,16 +248,16 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
             ))}
           </div>
 
-          <div className="flex items-center gap-4 bg-gray-50 dark:bg-white/5 p-1.5 rounded-xl border border-gray-100 dark:border-white/10 shadow-inner">
+          <div className="flex items-center gap-3 bg-gray-50 dark:bg-white/5 p-1 rounded-xl border border-gray-100 dark:border-white/10 shadow-inner">
              <button 
                 onClick={() => setSortBy('default')}
-                className={`px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${sortBy === 'default' ? 'bg-white dark:bg-gray-700 shadow-md text-primary' : 'text-text-sec-light/60'}`}
+                className={`px-5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${sortBy === 'default' ? 'bg-white dark:bg-gray-700 shadow-md text-primary' : 'text-text-sec-light/60'}`}
              >
                 Top Picks
              </button>
              <button 
                 onClick={() => setSortBy('rating')}
-                className={`px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${sortBy === 'rating' ? 'bg-white dark:bg-gray-700 shadow-md text-primary' : 'text-text-sec-light/60'}`}
+                className={`px-5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${sortBy === 'rating' ? 'bg-white dark:bg-gray-700 shadow-md text-primary' : 'text-text-sec-light/60'}`}
              >
                 Highest Rated
              </button>
@@ -264,13 +266,13 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
 
         <div
           ref={scrollContainerRef}
-          className="flex overflow-x-auto gap-8 pb-12 hide-scrollbar snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 scroll-smooth"
+          className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 scroll-smooth"
         >
           {filteredDestinations.map((dest) => (
             <div
               key={dest.id}
               onClick={() => setSelectedDest(dest)}
-              className="relative min-w-[320px] md:min-w-[440px] h-[550px] rounded-[2.5rem] overflow-hidden snap-center group cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-700 border border-transparent hover:border-primary/20"
+              className="relative min-w-[280px] md:min-w-[400px] h-[480px] rounded-[2rem] overflow-hidden snap-center group cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-700 border border-transparent hover:border-primary/20"
             >
               <img
                 src={dest.image}
@@ -279,34 +281,34 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-70 group-hover:opacity-85 transition-opacity duration-500"></div>
               
-              <div className="absolute top-6 right-6 bg-white/20 backdrop-blur-xl px-4 py-2 rounded-xl border border-white/20 flex items-center gap-2 group-hover:bg-white group-hover:text-black transition-all">
-                 <span className="material-symbols-outlined text-yellow-400 text-base filled">star</span>
-                 <span className="text-sm font-bold">{dest.rating}</span>
+              <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-xl px-3 py-1.5 rounded-lg border border-white/20 flex items-center gap-1.5 group-hover:bg-white group-hover:text-black transition-all">
+                 <span className="material-symbols-outlined text-yellow-400 text-sm filled">star</span>
+                 <span className="text-xs font-bold">{dest.rating}</span>
               </div>
 
               {dest.isTopChoice && (
-                <div className="absolute top-6 left-6 bg-primary text-white text-[9px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-full shadow-lg">
+                <div className="absolute top-4 left-4 bg-primary text-white text-[8px] font-bold uppercase tracking-widest px-4 py-2 rounded-full shadow-lg">
                   Top Choice
                 </div>
               )}
 
-              <div className="absolute bottom-0 left-0 w-full p-10 text-white transform group-hover:-translate-y-2 transition-transform duration-700">
-                <span className="text-[9px] font-bold tracking-widest opacity-60 uppercase mb-3 block">{dest.region}</span>
-                <h3 className="text-4xl font-bold mb-5 tracking-tight font-display">{dest.name}</h3>
+              <div className="absolute bottom-0 left-0 w-full p-8 text-white transform group-hover:-translate-y-2 transition-transform duration-700">
+                <span className="text-[9px] font-bold tracking-widest opacity-60 uppercase mb-2 block">{dest.region}</span>
+                <h3 className="text-3xl font-bold mb-4 tracking-tight font-display">{dest.name}</h3>
                 
-                <div className="flex flex-wrap gap-2 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                <div className="flex flex-wrap gap-2 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
                    {dest.suggestedActivities?.slice(0, 2).map(a => (
-                     <span key={a} className="text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-lg border border-white/10">{a}</span>
+                     <span key={a} className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 bg-white/20 backdrop-blur-md rounded-lg border border-white/10">{a}</span>
                    ))}
                 </div>
 
-                <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                <div className="flex items-center justify-between pt-4 border-t border-white/10">
                    <div>
-                      <p className="text-[9px] font-bold uppercase opacity-60 tracking-wider mb-1">Package Starts At</p>
-                      <p className="text-2xl font-bold text-white">{dest.price}</p>
+                      <p className="text-[9px] font-bold uppercase opacity-60 tracking-wider mb-0.5">Package Starts At</p>
+                      <p className="text-xl font-bold text-white">{dest.price}</p>
                    </div>
-                   <div className="size-12 rounded-2xl bg-white text-black flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all transform group-hover:rotate-12 shadow-xl">
-                     <span className="material-symbols-outlined text-2xl">arrow_forward</span>
+                   <div className="size-10 rounded-xl bg-white text-black flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all transform group-hover:rotate-12 shadow-xl">
+                     <span className="material-symbols-outlined text-xl">arrow_forward</span>
                    </div>
                 </div>
               </div>
@@ -314,14 +316,14 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
           ))}
         </div>
       </div>
-
+      {/* Modal logic remains identical to previous version, content omitted for brevity as spacing changes are main focus. */}
       {selectedDest && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setSelectedDest(null); setAiResponse(null); setEditedImage(null); }} />
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setSelectedDest(null); setAiResponse(null); setEditedImage(null); setCustomTripTitle(''); }} />
           
           <div className="relative w-full max-w-[1300px] h-full max-h-[90vh] bg-white dark:bg-[#12181F] rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 p-0 flex flex-col lg:flex-row">
             <button 
-              onClick={() => { setSelectedDest(null); setAiResponse(null); setEditedImage(null); }}
+              onClick={() => { setSelectedDest(null); setAiResponse(null); setEditedImage(null); setCustomTripTitle(''); }}
               className="absolute top-6 right-6 z-50 size-12 bg-white/10 backdrop-blur-xl rounded-full text-white hover:bg-primary transition-all flex items-center justify-center group"
             >
               <span className="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform">close</span>
@@ -446,18 +448,35 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
                   )}
                </div>
 
-               <div className="mt-12 pt-8 border-t border-gray-100 dark:border-white/5 flex flex-col md:flex-row md:items-center gap-8">
-                  <div className="flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-1">Total Package</p>
-                    <p className="text-4xl font-bold text-primary leading-none tracking-tight">{selectedDest.price}</p>
+               <div className="mt-12 pt-8 border-t border-gray-100 dark:border-white/5 flex flex-col gap-6">
+                  {/* Custom Trip Title Input */}
+                  <div className="flex flex-col gap-2">
+                     <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Name Your Trip (Optional)</label>
+                     <div className="relative">
+                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-sec-light opacity-40">edit</span>
+                        <input 
+                           type="text"
+                           value={customTripTitle}
+                           onChange={(e) => setCustomTripTitle(e.target.value)}
+                           placeholder={`${selectedDest.name} Adventure`}
+                           className="w-full h-12 pl-11 pr-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 focus:ring-1 focus:ring-primary outline-none text-sm font-semibold transition-all"
+                        />
+                     </div>
                   </div>
-                  <button 
-                    onClick={handleBooking}
-                    className="flex-1 h-16 bg-primary text-white rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3"
-                  >
-                    Confirm Booking
-                    <span className="material-symbols-outlined text-2xl">verified</span>
-                  </button>
+
+                  <div className="flex flex-col md:flex-row md:items-center gap-8">
+                    <div className="flex-1">
+                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-1">Total Package</p>
+                      <p className="text-4xl font-bold text-primary leading-none tracking-tight">{selectedDest.price}</p>
+                    </div>
+                    <button 
+                      onClick={handleBooking}
+                      className="flex-1 h-16 bg-primary text-white rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3"
+                    >
+                      Confirm Booking
+                      <span className="material-symbols-outlined text-2xl">verified</span>
+                    </button>
+                  </div>
                </div>
             </div>
           </div>
