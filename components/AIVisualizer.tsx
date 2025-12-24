@@ -5,7 +5,7 @@ export const AIVisualizer: React.FC = () => {
   const [mode, setMode] = useState<'create' | 'edit'>('create');
   const [prompt, setPrompt] = useState('');
   const [size, setSize] = useState<'1K' | '2K' | '4K'>('1K');
-  const [aspectRatio, setAspectRatio] = useState<'1:1' | '3:4' | '4:3' | '9:16' | '16:9'>('16:9');
+  const [aspectRatio, setAspectRatio] = useState('16:9');
   const [activeStyle, setActiveStyle] = useState('Cinematic');
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -16,9 +16,13 @@ export const AIVisualizer: React.FC = () => {
 
   const ratios = [
     { label: 'Square', value: '1:1', icon: 'square' },
+    { label: 'Standard', value: '4:3', icon: 'aspect_ratio' },
     { label: 'Landscape', value: '16:9', icon: 'crop_landscape' },
     { label: 'Portrait', value: '9:16', icon: 'crop_portrait' },
-    { label: 'Wide', value: '4:3', icon: 'aspect_ratio' }
+    { label: 'Classic', value: '3:2', icon: 'photo_size_select_actual' },
+    { label: 'Tall', value: '2:3', icon: 'portrait' },
+    { label: 'Vertical', value: '3:4', icon: 'crop_portrait' },
+    { label: 'Cinema', value: '21:9', icon: 'panorama_horizontal' },
   ];
   
   const sizes = ['1K', '2K', '4K'];
@@ -50,6 +54,15 @@ export const AIVisualizer: React.FC = () => {
     }
   };
 
+  const checkApiKey = async () => {
+    if ((window as any).aistudio) {
+        const hasKey = await (window as any).aistudio.hasSelectedApiKey();
+        if (!hasKey) {
+            await (window as any).aistudio.openSelectKey();
+        }
+    }
+  };
+
   const handleAction = async () => {
     if (!prompt) return;
     
@@ -57,16 +70,12 @@ export const AIVisualizer: React.FC = () => {
     setGeneratedImage(null);
     
     try {
+      await checkApiKey();
+      // Re-initialize with potentially new key
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
       if (mode === 'create') {
-        // Check for paid key for Veo/Imagen models if needed, but here using gemini-3-pro-image-preview
-        const hasKey = await (window as any).aistudio?.hasSelectedApiKey();
-        if (!hasKey) {
-          await (window as any).aistudio?.openSelectKey();
-        }
-
-        const finalPrompt = `${activeStyle} style image of ${prompt}. High quality, detailed, 8k resolution, professional lighting.`;
+        const finalPrompt = `${activeStyle} style image of ${prompt}. High quality, detailed.`;
         
         const response = await ai.models.generateContent({
           model: 'gemini-3-pro-image-preview',
@@ -105,7 +114,7 @@ export const AIVisualizer: React.FC = () => {
                   mimeType: mimeType 
                 } 
               },
-              { text: prompt } // User instruction like "Add a retro filter"
+              { text: prompt }
             ],
           },
         });
@@ -120,8 +129,8 @@ export const AIVisualizer: React.FC = () => {
 
     } catch (e: any) {
       console.error(e);
-      if (e.message?.includes("Requested entity was not found")) {
-        await (window as any).aistudio?.openSelectKey();
+      if (e.message?.includes("Requested entity was not found") && (window as any).aistudio) {
+        await (window as any).aistudio.openSelectKey();
       }
       alert(`AI ${mode === 'create' ? 'Generation' : 'Editing'} failed. Please try again.`);
     } finally {
@@ -130,25 +139,25 @@ export const AIVisualizer: React.FC = () => {
   };
 
   return (
-    <section className="w-full max-w-[1200px] px-6 py-10">
-      <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-4">
+    <section className="w-full max-w-[1200px] px-4 md:px-6 py-10 md:py-20">
+      <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-8 md:mb-12 gap-6">
         <div>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-3">
              <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                 <span className="material-symbols-outlined text-2xl filled">auto_awesome</span>
              </div>
              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight font-display">AI Visual Studio</h2>
           </div>
           <p className="text-text-sec-light dark:text-text-sec-dark max-w-xl text-sm md:text-base opacity-80 leading-relaxed font-medium">
-            Create dream destinations from scratch or reimagine your existing photos with our Nano Banana engine.
+            Create dream destinations from scratch or reimagine your existing photos with our advanced generation engine.
           </p>
         </div>
         
         {/* Mode Toggles */}
-        <div className="bg-gray-100 dark:bg-white/5 p-1 rounded-xl flex">
+        <div className="bg-gray-100 dark:bg-white/5 p-1.5 rounded-xl flex self-start md:self-auto">
           <button
             onClick={() => setMode('create')}
-            className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+            className={`px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all active:scale-95 ${
               mode === 'create' 
               ? 'bg-white dark:bg-gray-700 text-primary shadow-sm' 
               : 'text-text-sec-light hover:text-text-main-light'
@@ -158,7 +167,7 @@ export const AIVisualizer: React.FC = () => {
           </button>
           <button
             onClick={() => setMode('edit')}
-            className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+            className={`px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all active:scale-95 ${
               mode === 'edit' 
               ? 'bg-white dark:bg-gray-700 text-primary shadow-sm' 
               : 'text-text-sec-light hover:text-text-main-light'
@@ -169,10 +178,10 @@ export const AIVisualizer: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Controls Panel */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
-           <div className="bg-white dark:bg-surface-dark p-5 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl relative overflow-hidden group">
+        <div className="lg:col-span-5 flex flex-col gap-6 order-2 lg:order-1">
+           <div className="bg-white dark:bg-surface-dark p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl relative overflow-hidden group">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
               
               {mode === 'edit' && (
@@ -180,7 +189,7 @@ export const AIVisualizer: React.FC = () => {
                   <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-2 block ml-1">Source Image</label>
                   <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className={`w-full h-32 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden relative ${
+                    className={`w-full h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden relative active:scale-[0.99] ${
                       uploadedImage 
                       ? 'border-primary/50' 
                       : 'border-gray-200 dark:border-white/10 hover:border-primary/50 hover:bg-primary/5'
@@ -201,17 +210,12 @@ export const AIVisualizer: React.FC = () => {
                       onChange={handleFileUpload} 
                       className="hidden" 
                     />
-                    {uploadedImage && (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <span className="text-white text-xs font-bold uppercase">Change Image</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
 
               {/* Prompt Input */}
-              <div className="mb-4 relative">
+              <div className="mb-6 relative">
                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-2 block ml-1">
                    {mode === 'create' ? 'Your Vision' : 'Editing Instructions'}
                  </label>
@@ -219,7 +223,7 @@ export const AIVisualizer: React.FC = () => {
                    value={prompt}
                    onChange={(e) => setPrompt(e.target.value)}
                    placeholder={mode === 'create' ? "E.g., A minimalist beach villa in the Maldives..." : "E.g., Add a retro filter, remove the person in background..."}
-                   className="w-full h-24 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-4 text-sm font-medium focus:ring-2 focus:ring-primary outline-none transition-all resize-none shadow-inner text-text-main-light dark:text-text-main-dark placeholder:text-text-sec-light/40"
+                   className="w-full h-32 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-4 text-sm font-medium focus:ring-2 focus:ring-primary outline-none transition-all resize-none shadow-inner text-text-main-light dark:text-text-main-dark placeholder:text-text-sec-light/40"
                  />
                  <button 
                    onClick={() => setPrompt('')}
@@ -249,23 +253,23 @@ export const AIVisualizer: React.FC = () => {
 
               {/* Settings Grid - Only for Create Mode */}
               {mode === 'create' && (
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                    {/* Aspect Ratio */}
                    <div>
                       <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-2 block ml-1">Canvas Shape</label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-4 gap-2">
                          {ratios.map((r) => (
                            <button
                              key={r.value}
-                             onClick={() => setAspectRatio(r.value as any)}
-                             className={`flex flex-col items-center justify-center gap-0.5 py-2.5 rounded-xl border transition-all ${
+                             onClick={() => setAspectRatio(r.value)}
+                             className={`flex flex-col items-center justify-center gap-1 py-2 rounded-xl border transition-all active:scale-95 ${
                                aspectRatio === r.value 
-                               ? 'bg-primary/10 border-primary text-primary' 
+                               ? 'bg-primary/10 border-primary text-primary shadow-inner' 
                                : 'bg-gray-50 dark:bg-white/5 border-transparent text-text-sec-light hover:bg-gray-100 dark:hover:bg-white/10'
                              }`}
                            >
-                             <span className="material-symbols-outlined text-base">{r.icon}</span>
-                             <span className="text-[8px] font-bold uppercase">{r.label}</span>
+                             <span className="material-symbols-outlined text-sm">{r.icon}</span>
+                             <span className="text-[7px] font-bold uppercase">{r.value}</span>
                            </button>
                          ))}
                       </div>
@@ -279,7 +283,7 @@ export const AIVisualizer: React.FC = () => {
                             <select 
                               value={activeStyle}
                               onChange={(e) => setActiveStyle(e.target.value)}
-                              className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold appearance-none outline-none focus:ring-1 focus:ring-primary cursor-pointer text-text-main-light dark:text-text-main-dark"
+                              className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold appearance-none outline-none focus:ring-1 focus:ring-primary cursor-pointer text-text-main-light dark:text-text-main-dark hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
                             >
                               {styles.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                             </select>
@@ -293,7 +297,7 @@ export const AIVisualizer: React.FC = () => {
                               <button 
                                 key={s}
                                 onClick={() => setSize(s as any)}
-                                className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                                className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 ${
                                   size === s 
                                   ? 'bg-white dark:bg-gray-700 shadow-md text-primary' 
                                   : 'text-text-sec-light dark:text-text-sec-dark opacity-60 hover:opacity-100'
@@ -314,7 +318,7 @@ export const AIVisualizer: React.FC = () => {
                 className={`w-full h-14 rounded-2xl font-bold uppercase tracking-[0.15em] text-xs flex items-center justify-center gap-3 shadow-xl transition-all ${
                   loading || !prompt || (mode === 'edit' && !uploadedImage)
                   ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed' 
-                  : 'bg-primary text-white shadow-primary/25 hover:scale-[1.02] active:scale-95'
+                  : 'bg-primary text-white shadow-primary/25 hover:scale-[1.02] active:scale-95 hover:shadow-primary/40'
                 }`}
               >
                 {loading ? (
@@ -333,7 +337,7 @@ export const AIVisualizer: React.FC = () => {
         </div>
 
         {/* Preview Panel */}
-        <div className="lg:col-span-7 h-[400px] lg:h-auto bg-gray-900 rounded-[2.5rem] relative overflow-hidden shadow-2xl border border-gray-800 flex items-center justify-center group">
+        <div className="lg:col-span-7 h-[400px] lg:h-auto bg-gray-900 rounded-[2.5rem] relative overflow-hidden shadow-2xl border border-gray-800 flex items-center justify-center group order-1 lg:order-2">
            {generatedImage ? (
              <>
                <img 
@@ -347,23 +351,23 @@ export const AIVisualizer: React.FC = () => {
                   <a 
                     href={generatedImage} 
                     download={`bmt-${mode}.png`}
-                    className="size-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all shadow-xl"
+                    className="size-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all shadow-xl active:scale-90"
                     title="Download"
                   >
-                    <span className="material-symbols-outlined text-lg">download</span>
+                    <span className="material-symbols-outlined text-xl">download</span>
                   </a>
                   <button 
                     onClick={() => setGeneratedImage(null)}
-                    className="size-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-red-500 hover:border-red-500 transition-all shadow-xl"
+                    className="size-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-red-500 hover:border-red-500 transition-all shadow-xl active:scale-90"
                     title="Clear"
                   >
-                    <span className="material-symbols-outlined text-lg">close</span>
+                    <span className="material-symbols-outlined text-xl">close</span>
                   </button>
                </div>
                
-               <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
-                 <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-0.5">Prompt</p>
-                 <p className="text-white text-xs font-medium truncate max-w-xs md:max-w-md">{prompt}</p>
+               <div className="absolute bottom-6 left-6 right-6 bg-black/60 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/10">
+                 <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Prompt</p>
+                 <p className="text-white text-sm font-medium truncate">{prompt}</p>
                </div>
              </>
            ) : (
@@ -376,21 +380,21 @@ export const AIVisualizer: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-white text-xl font-bold font-display tracking-tight mb-1">Processing Vision</h3>
-                      <p className="text-white/40 text-xs">AI is working on your request...</p>
+                      <p className="text-white/40 text-xs">High-fidelity rendering in progress...</p>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <div className="size-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
-                       <span className="material-symbols-outlined text-4xl text-white/20">{mode === 'create' ? 'image' : 'edit'}</span>
+                    <div className="size-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10 group-hover:scale-110 transition-transform duration-500">
+                       <span className="material-symbols-outlined text-5xl text-white/20">{mode === 'create' ? 'image' : 'edit'}</span>
                     </div>
-                    <h3 className="text-white text-xl font-bold font-display tracking-tight mb-2">
+                    <h3 className="text-white text-2xl font-bold font-display tracking-tight mb-3">
                       {mode === 'create' ? 'Ready to Visualize' : 'Ready to Edit'}
                     </h3>
-                    <p className="text-white/40 text-xs max-w-sm mx-auto">
+                    <p className="text-white/40 text-sm max-w-md mx-auto leading-relaxed">
                        {mode === 'create' 
-                         ? 'Enter a prompt and adjust the settings to see your imagination come to life.' 
-                         : 'Upload an image and use text commands like "Add a sunset" or "Remove people".'}
+                         ? 'Enter a detailed prompt and adjust the advanced settings to see your imagination come to life in 4K.' 
+                         : 'Upload an image and use natural language commands like "Add a sunset" or "Remove people".'}
                     </p>
                   </>
                 )}

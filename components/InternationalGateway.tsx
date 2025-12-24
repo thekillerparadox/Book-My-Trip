@@ -95,14 +95,12 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
 
       const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
       if (audioData) {
-         // Decode Base64 to ArrayBuffer
          const binaryString = atob(audioData);
          const bytes = new Uint8Array(binaryString.length);
          for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
          
          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
          
-         // Manually decode PCM (Int16 to Float32)
          const data16 = new Int16Array(bytes.buffer);
          const float32 = new Float32Array(data16.length);
          for (let i=0; i<data16.length; i++) float32[i] = data16[i] / 32768;
@@ -254,7 +252,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
   };
 
   return (
-    <section className="w-full max-w-[1440px] mx-auto px-6 py-8 border border-gray-100 dark:border-white/5 rounded-[2.5rem] glass-panel shadow-2xl relative">
+    <section className="w-full max-w-[1440px] mx-auto px-4 md:px-6 py-8 border border-gray-100 dark:border-white/5 rounded-[2.5rem] glass-panel shadow-2xl relative">
       <div className="max-w-[1200px] mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
           <div>
@@ -284,12 +282,12 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
             {regions.map((region) => (
               <button
                 key={region}
                 onClick={() => setActiveRegion(region)}
-                className={`px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all whitespace-nowrap shadow-sm border ${
+                className={`px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all whitespace-nowrap shadow-sm border active:scale-95 ${
                   activeRegion === region
                     ? 'bg-primary text-white border-primary shadow-primary/20'
                     : 'bg-white dark:bg-white/5 text-text-sec-light border-gray-100 dark:border-white/10 hover:border-primary/40'
@@ -300,16 +298,16 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
             ))}
           </div>
 
-          <div className="flex items-center gap-3 bg-gray-50 dark:bg-white/5 p-1 rounded-xl border border-gray-100 dark:border-white/10 shadow-inner">
+          <div className="flex items-center gap-3 bg-gray-50 dark:bg-white/5 p-1 rounded-xl border border-gray-100 dark:border-white/10 shadow-inner self-start md:self-auto">
              <button 
                 onClick={() => setSortBy('default')}
-                className={`px-5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${sortBy === 'default' ? 'bg-white dark:bg-gray-700 shadow-md text-primary' : 'text-text-sec-light/60'}`}
+                className={`px-5 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 ${sortBy === 'default' ? 'bg-white dark:bg-gray-700 shadow-md text-primary' : 'text-text-sec-light/60'}`}
              >
                 Top Picks
              </button>
              <button 
                 onClick={() => setSortBy('rating')}
-                className={`px-5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${sortBy === 'rating' ? 'bg-white dark:bg-gray-700 shadow-md text-primary' : 'text-text-sec-light/60'}`}
+                className={`px-5 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 ${sortBy === 'rating' ? 'bg-white dark:bg-gray-700 shadow-md text-primary' : 'text-text-sec-light/60'}`}
              >
                 Highest Rated
              </button>
@@ -318,13 +316,13 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
 
         <div
           ref={scrollContainerRef}
-          className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 scroll-smooth"
+          className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 scroll-smooth"
         >
           {filteredDestinations.map((dest) => (
             <div
               key={dest.id}
               onClick={() => setSelectedDest(dest)}
-              className="relative min-w-[280px] md:min-w-[400px] h-[480px] rounded-[2rem] overflow-hidden snap-center group cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-700 border border-transparent hover:border-primary/20"
+              className="relative min-w-[280px] md:min-w-[400px] h-[480px] rounded-[2rem] overflow-hidden snap-center group cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-700 border border-transparent hover:border-primary/20 active:scale-[0.98]"
             >
               <img
                 src={dest.image}
@@ -344,9 +342,9 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
                 </div>
               )}
 
-              <div className="absolute bottom-0 left-0 w-full p-8 text-white transform group-hover:-translate-y-2 transition-transform duration-700">
+              <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 text-white transform group-hover:-translate-y-2 transition-transform duration-700">
                 <span className="text-[9px] font-bold tracking-widest opacity-60 uppercase mb-2 block">{dest.region}</span>
-                <h3 className="text-3xl font-bold mb-4 tracking-tight font-display">{dest.name}</h3>
+                <h3 className="text-2xl md:text-3xl font-bold mb-4 tracking-tight font-display">{dest.name}</h3>
                 
                 <div className="flex flex-wrap gap-2 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
                    {dest.suggestedActivities?.slice(0, 2).map(a => (
@@ -370,27 +368,27 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
       </div>
       
       {selectedDest && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-0 md:p-4 lg:p-8 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setSelectedDest(null); setAiResponse(null); setEditedImage(null); setCustomTripTitle(''); }} />
           
-          <div className="relative w-full max-w-[1300px] h-full max-h-[90vh] bg-white dark:bg-[#12181F] rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 p-0 flex flex-col lg:flex-row">
+          <div className="relative w-full max-w-[1300px] h-full max-h-[100vh] md:max-h-[90vh] bg-white dark:bg-[#12181F] md:rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 p-0 flex flex-col lg:flex-row">
             <button 
               onClick={() => { setSelectedDest(null); setAiResponse(null); setEditedImage(null); setCustomTripTitle(''); }}
-              className="absolute top-6 right-6 z-50 size-12 bg-white/10 backdrop-blur-xl rounded-full text-white hover:bg-primary transition-all flex items-center justify-center group"
+              className="absolute top-6 right-6 z-50 size-12 bg-white/10 backdrop-blur-xl rounded-full text-white hover:bg-primary transition-all flex items-center justify-center group active:scale-90"
             >
               <span className="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform">close</span>
             </button>
 
-            <div className="w-full lg:w-[40%] h-64 lg:h-auto relative">
+            <div className="w-full lg:w-[40%] h-64 lg:h-auto relative flex-shrink-0">
                <img 
                  src={editedImage || selectedDest.image} 
                  alt={selectedDest.name}
                  className="w-full h-full object-cover"
                />
                <div className="absolute inset-0 bg-gradient-to-t from-[#12181F] via-transparent to-black/30" />
-               <div className="absolute bottom-10 left-10 right-10 text-white">
-                  <h2 className="text-5xl font-bold tracking-tight mb-6 font-display">{selectedDest.name}</h2>
-                  <div className="bg-black/30 backdrop-blur-xl border border-white/10 p-6 rounded-2xl">
+               <div className="absolute bottom-6 left-6 right-6 lg:bottom-10 lg:left-10 lg:right-10 text-white">
+                  <h2 className="text-4xl lg:text-5xl font-bold tracking-tight mb-4 lg:mb-6 font-display">{selectedDest.name}</h2>
+                  <div className="bg-black/30 backdrop-blur-xl border border-white/10 p-4 lg:p-6 rounded-2xl hidden md:block">
                      <div className="flex items-center gap-2 mb-3">
                         <span className="material-symbols-outlined text-primary text-lg">auto_fix_high</span>
                         <label className="text-[9px] font-bold uppercase text-white/50 tracking-widest">Nano Magic Edit</label>
@@ -415,25 +413,25 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
                </div>
             </div>
 
-            <div className="w-full lg:w-[60%] p-8 lg:p-16 overflow-y-auto hide-scrollbar flex flex-col bg-white dark:bg-[#12181F]">
-               <div className="flex flex-wrap items-center gap-4 mb-12">
+            <div className="w-full lg:w-[60%] p-6 lg:p-16 overflow-y-auto hide-scrollbar flex flex-col bg-white dark:bg-[#12181F]">
+               <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 lg:mb-12">
                   <button 
                     onClick={handleAISearch}
-                    className="flex-1 min-w-[150px] flex items-center justify-center gap-3 h-14 bg-gray-50 dark:bg-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all border border-gray-100 dark:border-white/5"
+                    className="w-full sm:flex-1 min-w-[140px] flex items-center justify-center gap-3 h-14 bg-gray-50 dark:bg-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all border border-gray-100 dark:border-white/5 active:scale-[0.98]"
                   >
                     <span className="material-symbols-outlined text-2xl">travel_explore</span>
                     AI Search
                   </button>
                   <button 
                     onClick={handleAIMaps}
-                    className="flex-1 min-w-[150px] flex items-center justify-center gap-3 h-14 bg-gray-50 dark:bg-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all border border-gray-100 dark:border-white/5"
+                    className="w-full sm:flex-1 min-w-[140px] flex items-center justify-center gap-3 h-14 bg-gray-50 dark:bg-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all border border-gray-100 dark:border-white/5 active:scale-[0.98]"
                   >
                     <span className="material-symbols-outlined text-2xl">pin_drop</span>
                     Maps
                   </button>
                   <button 
                     onClick={handleAITinerary}
-                    className="flex-1 min-w-[150px] flex items-center justify-center gap-3 h-14 bg-primary/10 text-primary rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all border border-primary/20"
+                    className="w-full sm:flex-1 min-w-[140px] flex items-center justify-center gap-3 h-14 bg-primary/10 text-primary rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all border border-primary/20 active:scale-[0.98]"
                   >
                     <span className="material-symbols-outlined text-2xl">lightbulb_circle</span>
                     Itinerary
@@ -448,7 +446,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
                       <p className="text-sm opacity-40 font-medium">Please wait while our AI synthesizes real-time travel data.</p>
                     </div>
                   ) : aiResponse ? (
-                    <div className="bg-gray-50 dark:bg-white/5 p-8 rounded-3xl border border-gray-100 dark:border-white/5 animate-in slide-in-from-bottom-6 duration-700">
+                    <div className="bg-gray-50 dark:bg-white/5 p-6 lg:p-8 rounded-3xl border border-gray-100 dark:border-white/5 animate-in slide-in-from-bottom-6 duration-700">
                       <div className="flex items-center justify-between mb-8">
                          <h4 className="text-lg font-bold tracking-tight font-display">Concierge Insights</h4>
                          <button onClick={() => setAiResponse(null)} className="text-[10px] font-bold uppercase tracking-widest text-primary opacity-60 hover:opacity-100">Clear</button>
@@ -475,7 +473,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
                       )}
                     </div>
                   ) : (
-                    <div className="space-y-12">
+                    <div className="space-y-8 lg:space-y-12">
                        <div className="relative">
                           <button 
                             onClick={handleReadAloud}
@@ -486,12 +484,12 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
                             <span className="material-symbols-outlined">{isPlayingTTS ? 'volume_up' : 'text_to_speech'}</span>
                           </button>
                           <h4 className="text-[10px] font-bold uppercase text-primary tracking-widest mb-4">The Experience</h4>
-                          <p className="text-2xl font-bold leading-relaxed tracking-tight font-display">
+                          <p className="text-xl md:text-2xl font-bold leading-relaxed tracking-tight font-display">
                              "{selectedDest.description}"
                           </p>
                        </div>
                        
-                       <div className="grid grid-cols-2 gap-6">
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                           <div className="bg-gray-50 dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/5">
                              <h4 className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-2">Best Time</h4>
                              <p className="font-bold text-lg text-primary">{selectedDest.bestTimeToVisit}</p>
@@ -508,7 +506,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
                   )}
                </div>
 
-               <div className="mt-12 pt-8 border-t border-gray-100 dark:border-white/5 flex flex-col gap-6">
+               <div className="mt-8 lg:mt-12 pt-8 border-t border-gray-100 dark:border-white/5 flex flex-col gap-6">
                   {/* Custom Trip Title Input */}
                   <div className="flex flex-col gap-2">
                      <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">Name Your Trip (Optional)</label>
@@ -524,14 +522,14 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
                      </div>
                   </div>
 
-                  <div className="flex flex-col md:flex-row md:items-center gap-8">
+                  <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
                     <div className="flex-1">
                       <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-1">Total Package</p>
-                      <p className="text-4xl font-bold text-primary leading-none tracking-tight">{selectedDest.price}</p>
+                      <p className="text-3xl md:text-4xl font-bold text-primary leading-none tracking-tight">{selectedDest.price}</p>
                     </div>
                     <button 
                       onClick={handleBooking}
-                      className="flex-1 h-16 bg-primary text-white rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3"
+                      className="flex-1 h-14 md:h-16 bg-primary text-white rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3"
                     >
                       Confirm Booking
                       <span className="material-symbols-outlined text-2xl">verified</span>

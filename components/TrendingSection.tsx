@@ -103,7 +103,6 @@ export const TrendingSection: React.FC = () => {
     setIsThinking(false);
   };
 
-  // Close modal on escape key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closePulse();
@@ -113,7 +112,7 @@ export const TrendingSection: React.FC = () => {
   }, []);
 
   return (
-    <section id="destinations" className="w-full max-w-[1200px] px-6 py-8 relative">
+    <section id="destinations" className="w-full max-w-[1200px] px-4 md:px-6 py-4 relative">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -143,12 +142,12 @@ export const TrendingSection: React.FC = () => {
       </div>
 
       {/* States Filter Bar */}
-      <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-6 mb-2">
+      <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-6 mb-2 -mx-4 px-4 md:mx-0 md:px-0">
         {states.map((state) => (
           <button
             key={state}
             onClick={() => setActiveState(state)}
-            className={`px-5 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-[0.15em] transition-all border whitespace-nowrap shadow-sm ${
+            className={`px-5 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-[0.15em] transition-all border whitespace-nowrap shadow-sm active:scale-95 ${
               activeState === state
                 ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105'
                 : 'bg-white dark:bg-white/5 text-text-sec-light dark:text-text-sec-dark border-gray-100 dark:border-white/10 hover:border-primary/40 hover:bg-gray-50'
@@ -161,7 +160,7 @@ export const TrendingSection: React.FC = () => {
 
       <div
         ref={scrollContainerRef}
-        className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 scroll-smooth"
+        className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 scroll-smooth"
       >
         {filteredDestinations.map((dest) => (
           <div
@@ -178,7 +177,7 @@ export const TrendingSection: React.FC = () => {
               
               <button 
                 onClick={(e) => toggleFavorite(dest.id, e)}
-                className={`absolute top-4 right-4 size-10 rounded-xl backdrop-blur-2xl flex items-center justify-center transition-all duration-300 z-20 ${
+                className={`absolute top-4 right-4 size-10 rounded-xl backdrop-blur-2xl flex items-center justify-center transition-all duration-300 z-20 active:scale-75 ${
                   favorites.has(dest.id) 
                   ? 'bg-red-500 text-white shadow-xl scale-110' 
                   : 'bg-white/10 text-white hover:bg-white/30 border border-white/20'
@@ -202,7 +201,7 @@ export const TrendingSection: React.FC = () => {
                  {/* AI Pulse Button */}
                  <button 
                    onClick={(e) => handleAIPulse(dest.id, dest.name, e)}
-                   className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all flex items-center gap-1.5 shadow-lg group/ai"
+                   className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all flex items-center gap-1.5 shadow-lg group/ai active:scale-95"
                  >
                     <span className="material-symbols-outlined text-sm group-hover/ai:text-primary transition-colors">auto_awesome</span>
                     AI Pulse
@@ -229,7 +228,7 @@ export const TrendingSection: React.FC = () => {
                     <p className="text-[8px] opacity-40 font-bold uppercase tracking-wider mb-0.5">Packages from</p>
                     <span className="text-primary font-extrabold text-xl leading-none">{dest.price}</span>
                  </div>
-                 <button className="h-10 px-4 rounded-xl bg-gray-50 dark:bg-white/5 hover:bg-primary hover:text-white transition-all group/btn shadow-sm border border-gray-100 dark:border-white/5 flex items-center gap-2">
+                 <button className="h-10 px-4 rounded-xl bg-gray-50 dark:bg-white/5 hover:bg-primary hover:text-white transition-all group/btn shadow-sm border border-gray-100 dark:border-white/5 flex items-center gap-2 active:scale-95">
                     <span className="font-extrabold text-[9px] uppercase tracking-widest">Explore</span>
                     <span className="material-symbols-outlined text-base group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
                  </button>
@@ -256,7 +255,7 @@ export const TrendingSection: React.FC = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
 
-            <button onClick={closePulse} className="absolute top-4 right-4 size-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 z-10 transition-colors">
+            <button onClick={closePulse} className="absolute top-4 right-4 size-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 z-10 transition-colors active:scale-90">
               <span className="material-symbols-outlined text-lg">close</span>
             </button>
 

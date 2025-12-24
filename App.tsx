@@ -12,7 +12,7 @@ import { TripsSection } from './components/TripsSection';
 import { AIVisualizer } from './components/AIVisualizer';
 import { ReviewsSection } from './components/ReviewsSection';
 import { AccessibilityPanel } from './components/AccessibilityPanel';
-import { VoiceAssistant } from './components/VoiceAssistant';
+import { ChatBot } from './components/ChatBot';
 import { AppView, Trip } from './types';
 
 const App: React.FC = () => {
@@ -89,7 +89,7 @@ const App: React.FC = () => {
       
       {/* Accessibility Features */}
       <AccessibilityPanel />
-      <VoiceAssistant setView={setCurrentView} />
+      <ChatBot />
     </div>
   );
 };

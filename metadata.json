@@ -2,6 +2,7 @@
   "name": "Book My Trip",
   "description": "A travel booking platform that curates personalized experiences based on your mood, featuring trending destinations and exclusive deals.",
   "requestFramePermissions": [
-    "geolocation"
+    "geolocation",
+    "microphone"
   ]
 }

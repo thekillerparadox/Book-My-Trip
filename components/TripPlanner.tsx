@@ -39,7 +39,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
   const scopeOptions = [
     { id: 'Global', label: 'Anywhere 🌍' },
     { id: 'India', label: 'India 🇮🇳' },
-    { id: 'International', label: 'International ✈️' },
+    { id: 'International', label: 'Abroad ✈️' },
   ];
 
   // Helper to find a relevant image
@@ -75,7 +75,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
         model: 'gemini-3-pro-preview',
         contents: prompt,
         config: {
-          thinkingConfig: { thinkingBudget: 32768 }, // Max thinking for complex planning
+          thinkingConfig: { thinkingBudget: 32768 },
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -181,7 +181,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
   };
 
   return (
-    <section className="w-full max-w-[1200px] px-6 py-12">
+    <section className="w-full max-w-[1200px] px-4 md:px-6 py-4">
       <div className="bg-white dark:bg-surface-dark rounded-[3rem] shadow-2xl border border-gray-100 dark:border-white/5 overflow-hidden relative">
         {/* Background Decor */}
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-accent to-secondary"></div>
@@ -190,7 +190,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
         <div className="grid grid-cols-1 lg:grid-cols-12">
           
           {/* Input Panel */}
-          <div className="lg:col-span-5 p-8 md:p-10 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-white/5 flex flex-col justify-center">
+          <div className="lg:col-span-5 p-6 md:p-10 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-white/5 flex flex-col justify-center">
              <div className="flex items-center gap-3 mb-4">
                 <div className="size-12 bg-accent/10 rounded-2xl flex items-center justify-center text-accent">
                    <span className="material-symbols-outlined text-2xl filled">explore</span>
@@ -207,12 +207,12 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
                 {/* Scope Filter (Global/India/International) */}
                 <div>
                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-3 block ml-1">Where to?</label>
-                   <div className="flex bg-gray-50 dark:bg-white/5 p-1 rounded-xl">
+                   <div className="flex bg-gray-50 dark:bg-white/5 p-1 rounded-xl overflow-x-auto hide-scrollbar">
                       {scopeOptions.map((opt) => (
                         <button
                            key={opt.id}
                            onClick={() => setScope(opt.id as any)}
-                           className={`flex-1 py-2 rounded-lg text-[10px] font-bold transition-all ${
+                           className={`flex-1 py-3 px-2 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap active:scale-95 ${
                               scope === opt.id 
                               ? 'bg-white dark:bg-gray-700 shadow-md text-primary' 
                               : 'text-text-sec-light dark:text-text-sec-dark opacity-60 hover:opacity-100'
@@ -232,7 +232,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
                          <button
                             key={opt.id}
                             onClick={() => setGroupType(opt.id as any)}
-                            className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                            className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left active:scale-[0.98] ${
                                groupType === opt.id
                                ? 'border-primary bg-primary/5 text-primary'
                                : 'border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 text-text-sec-light'
@@ -252,7 +252,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
                       <select 
                          value={budget}
                          onChange={(e) => setBudget(e.target.value as any)}
-                         className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                         className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-1 focus:ring-primary cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
                       >
                          <option value="Budget">💰 Budget Friendly</option>
                          <option value="Standard">⚖️ Balanced</option>
@@ -263,11 +263,11 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
                    <div>
                       <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-3 block ml-1">Days</label>
                       <div className="flex items-center gap-3 bg-gray-50 dark:bg-white/5 rounded-xl px-4 h-[42px] border border-gray-100 dark:border-white/10">
-                         <button onClick={() => setDuration(d => Math.max(1, d - 1))} className="text-primary hover:scale-110 transition-transform">
+                         <button onClick={() => setDuration(d => Math.max(1, d - 1))} className="text-primary hover:scale-125 transition-transform active:scale-90">
                             <span className="material-symbols-outlined text-sm">remove</span>
                          </button>
                          <span className="flex-1 text-center text-xs font-bold">{duration}</span>
-                         <button onClick={() => setDuration(d => Math.min(30, d + 1))} className="text-primary hover:scale-110 transition-transform">
+                         <button onClick={() => setDuration(d => Math.min(30, d + 1))} className="text-primary hover:scale-125 transition-transform active:scale-90">
                             <span className="material-symbols-outlined text-sm">add</span>
                          </button>
                       </div>
@@ -280,7 +280,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
                   className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] shadow-xl flex items-center justify-center gap-2 transition-all ${
                      isThinking 
                      ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed'
-                     : 'bg-text-main-light dark:bg-white text-white dark:text-black hover:scale-[1.01] active:scale-95'
+                     : 'bg-text-main-light dark:bg-white text-white dark:text-black hover:scale-[1.01] active:scale-95 hover:shadow-2xl'
                   }`}
                 >
                    {isThinking ? (
@@ -299,21 +299,21 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
           </div>
 
           {/* Results Panel */}
-          <div className="lg:col-span-7 bg-gray-50 dark:bg-[#0A0C10] p-0 relative overflow-hidden flex flex-col">
+          <div className="lg:col-span-7 bg-gray-50 dark:bg-[#0A0C10] p-0 relative overflow-hidden flex flex-col min-h-[500px] lg:min-h-auto">
              {/* Background Pattern */}
              <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #6366F1 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
              {result ? (
                 <div className="relative z-10 animate-in fade-in slide-in-from-right-8 duration-700 h-full flex flex-col">
                    {/* Destination Image Banner */}
-                   <div className="relative h-48 w-full overflow-hidden">
+                   <div className="relative h-48 md:h-64 w-full overflow-hidden">
                       <img 
                         src={getDestinationImage(result.destination)} 
                         alt={result.destination}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-[2s] hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-gray-50 dark:from-[#0A0C10] to-transparent"></div>
-                      <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white shadow-lg">
+                      <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white shadow-lg animate-in fade-in zoom-in delay-300">
                         <div className="flex items-center gap-1.5">
                           <span className="material-symbols-outlined text-sm filled">check_circle</span>
                           <span className="text-[10px] font-bold uppercase tracking-widest">{result.match_score}% Match</span>
@@ -321,19 +321,19 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
                       </div>
                    </div>
 
-                   <div className="p-8 md:p-10 pt-4 flex-1 flex flex-col">
+                   <div className="p-6 md:p-10 pt-4 flex-1 flex flex-col">
                      <span className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-2 block">{groupType} • {duration} Days</span>
 
-                     <h3 className="text-4xl md:text-5xl font-black font-display tracking-tight mb-2 text-text-main-light dark:text-text-main-dark leading-none">
+                     <h3 className="text-3xl md:text-5xl font-black font-display tracking-tight mb-2 text-text-main-light dark:text-text-main-dark leading-none">
                         {result.destination}
                      </h3>
-                     <p className="text-lg font-medium text-primary mb-6 flex items-center gap-2">
+                     <p className="text-base md:text-lg font-medium text-primary mb-6 flex items-center gap-2">
                         <span className="material-symbols-outlined">location_on</span>
                         {result.location}
                         <button 
                           onClick={handleReadResult}
                           disabled={isPlayingTTS}
-                          className={`ml-2 size-8 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors ${isPlayingTTS ? 'text-primary animate-pulse' : 'text-text-sec-light'}`}
+                          className={`ml-2 size-8 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 transition-all active:scale-95 ${isPlayingTTS ? 'text-primary animate-pulse' : 'text-text-sec-light'}`}
                         >
                           <span className="material-symbols-outlined text-lg">{isPlayingTTS ? 'volume_up' : 'text_to_speech'}</span>
                         </button>
@@ -364,7 +364,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
 
                      <button 
                        onClick={handleBookClick}
-                       className="w-full h-14 bg-primary text-white rounded-xl font-bold uppercase tracking-widest text-[11px] shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 mt-auto"
+                       className="w-full h-14 bg-primary text-white rounded-xl font-bold uppercase tracking-widest text-[11px] shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 mt-auto"
                      >
                         Book This Plan
                         <span className="material-symbols-outlined">arrow_forward</span>
@@ -372,7 +372,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
                    </div>
                 </div>
              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center relative z-10 opacity-40 p-10">
+                <div className="h-full flex flex-col items-center justify-center text-center relative z-10 opacity-40 p-10 min-h-[400px]">
                    {isThinking ? (
                       <div className="animate-pulse flex flex-col items-center">
                          <span className="material-symbols-outlined text-6xl mb-4 text-primary">cloud_sync</span>

@@ -149,7 +149,7 @@ export const TourGuideSection: React.FC<TourGuideSectionProps> = ({ onBook }) =>
         Think deeply about the user's intent (e.g. "food" means they want culinary spots, "history" means museums/ruins).
         `,
         config: {
-          thinkingConfig: { thinkingBudget: 4096 }, // Moderate thinking for matching
+          thinkingConfig: { thinkingBudget: 32768 },
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -166,10 +166,6 @@ export const TourGuideSection: React.FC<TourGuideSectionProps> = ({ onBook }) =>
       if (response.text) {
         const result = JSON.parse(response.text);
         setAiRecommendation(result);
-        const match = MOCK_GUIDES.find(g => g.id === result.bestMatchId);
-        if (match) {
-          // Scroll to match or highlight? We'll just show the recommendation card at top.
-        }
       }
     } catch (e) {
       console.error(e);
@@ -180,7 +176,7 @@ export const TourGuideSection: React.FC<TourGuideSectionProps> = ({ onBook }) =>
   };
 
   return (
-    <section className="w-full pt-28 pb-16 px-6 min-h-screen flex flex-col items-center">
+    <section className="w-full pt-28 pb-16 px-4 md:px-6 min-h-screen flex flex-col items-center">
       <div className="max-w-[1200px] w-full">
         
         {/* Hero Header */}
