@@ -10,7 +10,10 @@ interface AccessibilityAgentProps {
 interface Message {
   role: 'user' | 'model';
   text: string;
+  timestamp: Date;
 }
+
+const AGENT_NAME = "Maya";
 
 const navigationTool: FunctionDeclaration = {
   name: 'navigate',
@@ -27,6 +30,13 @@ const navigationTool: FunctionDeclaration = {
     required: ['view']
   }
 };
+
+const SUGGESTIONS = [
+  { text: "Plan a wheelchair accessible trip", icon: "accessible" },
+  { text: "Navigate to My Trips", icon: "luggage" },
+  { text: "Find budget destinations", icon: "savings" },
+  { text: "Safety tips for solo travelers", icon: "security" }
+];
 
 export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,42 +60,49 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
   // Init Chat Session
   useEffect(() => {
     if (isOpen && mode === 'chat' && !chatSession) {
+      initChat();
+    }
+  }, [isOpen, mode]);
+
+  const initChat = () => {
       try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const chat = ai.chats.create({
           model: 'gemini-3-pro-preview',
           config: {
             thinkingConfig: { thinkingBudget: 32768 },
-            systemInstruction: "You are a 24/7 AI travel agent and accessibility assistant for Book My Trip. You help users navigate the site, plan trips, and find accessibility information. Be concise, helpful, and friendly."
+            systemInstruction: `You are ${AGENT_NAME}, a 24/7 AI travel agent and accessibility assistant for Book My Trip. You help users navigate the site, plan trips, and find accessibility information. Be concise, helpful, and friendly. Provide lists with bullet points where appropriate.`
           }
         });
         setChatSession(chat);
-        setMessages([{ role: 'model', text: "Hi! I'm your 24/7 accessibility agent. I can help you plan trips, navigate the site, or answer any questions. How can I assist you today?" }]);
+        setMessages([{ 
+            role: 'model', 
+            text: `Hi! I'm ${AGENT_NAME}, your 24/7 accessibility agent. I can help you plan trips, navigate the site, or answer any questions. How can I assist you today?`,
+            timestamp: new Date()
+        }]);
       } catch (e) {
         console.error("Chat Init Failed", e);
       }
-    }
-  }, [isOpen, mode]);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isChatLoading]);
 
   // Chat Handlers
-  const handleSendMessage = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!input.trim() || !chatSession || isChatLoading) return;
+  const handleSendMessage = async (textOverride?: string) => {
+    const textToSend = textOverride || input;
+    if (!textToSend.trim() || !chatSession || isChatLoading) return;
 
-    const userText = input;
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', text: userText }]);
+    setMessages(prev => [...prev, { role: 'user', text: textToSend, timestamp: new Date() }]);
     setIsChatLoading(true);
 
     try {
-      const result = await chatSession.sendMessageStream({ message: userText });
+      const result = await chatSession.sendMessageStream({ message: textToSend });
       
       let fullText = '';
-      setMessages(prev => [...prev, { role: 'model', text: '' }]); // Placeholder
+      setMessages(prev => [...prev, { role: 'model', text: '', timestamp: new Date() }]); // Placeholder
 
       for await (const chunk of result) {
         const text = chunk.text;
@@ -93,17 +110,27 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
           fullText += text;
           setMessages(prev => {
             const newMsgs = [...prev];
-            newMsgs[newMsgs.length - 1] = { role: 'model', text: fullText };
+            newMsgs[newMsgs.length - 1] = { ...newMsgs[newMsgs.length - 1], text: fullText };
             return newMsgs;
           });
         }
       }
     } catch (err) {
       console.error(err);
-      setMessages(prev => [...prev, { role: 'model', text: "I'm having trouble connecting right now. Please try again." }]);
+      setMessages(prev => [...prev, { role: 'model', text: "I'm having trouble connecting right now. Please try again.", timestamp: new Date() }]);
     } finally {
       setIsChatLoading(false);
     }
+  };
+
+  const handleClearChat = () => {
+      if (window.confirm("Clear conversation history?")) {
+        setMessages([]); // Clear first
+        setChatSession(null); // Reset session to clear context
+        setTimeout(() => {
+            initChat(); // Re-init
+        }, 100);
+      }
   };
 
   // Voice Handlers
@@ -147,7 +174,7 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
           responseModalities: [Modality.AUDIO],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
           tools: [{ functionDeclarations: [navigationTool] }],
-          systemInstruction: "You are a helpful voice assistant for Book My Trip. You can navigate the app using the navigate tool."
+          systemInstruction: `You are ${AGENT_NAME}, a helpful voice assistant for Book My Trip. You can navigate the app using the navigate tool.`
         },
         callbacks: {
           onopen: () => {
@@ -222,22 +249,40 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
         <div className="fixed bottom-24 right-4 md:right-6 z-[999] w-[calc(100vw-2rem)] md:w-[400px] h-[600px] max-h-[80vh] bg-white dark:bg-surface-dark rounded-[2rem] shadow-2xl border border-gray-100 dark:border-white/10 flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300">
           
           {/* Header */}
-          <div className="bg-primary p-4 flex items-center justify-between text-white shrink-0">
+          <div className="bg-primary p-4 flex items-center justify-between text-white shrink-0 shadow-lg relative z-10">
              <div className="flex items-center gap-3">
-               <div className="size-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
+               <div className="size-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md shadow-inner">
                  <span className="material-symbols-outlined text-xl">smart_toy</span>
                </div>
                <div>
-                 <h3 className="font-bold text-sm">24/7 Agent</h3>
-                 <p className="text-[10px] opacity-80 uppercase tracking-wider font-bold">
-                   {mode === 'chat' ? 'Thinking Mode Active' : 'Live Voice Active'}
+                 <h3 className="font-bold text-sm">{AGENT_NAME} • Concierge</h3>
+                 <p className="text-[10px] opacity-80 uppercase tracking-wider font-bold flex items-center gap-1">
+                   {mode === 'chat' ? (
+                       <>
+                         <span className="size-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                         Thinking Mode Active
+                       </>
+                   ) : (
+                       <>
+                         <span className="size-1.5 rounded-full bg-red-400 animate-pulse"></span>
+                         Live Voice Active
+                       </>
+                   )}
                  </p>
                </div>
              </div>
              <div className="flex gap-2">
                 <button 
+                    onClick={handleClearChat}
+                    className="size-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                    title="Clear Chat"
+                >
+                    <span className="material-symbols-outlined text-sm">delete</span>
+                </button>
+                <div className="h-8 w-px bg-white/20 mx-1"></div>
+                <button 
                   onClick={() => setMode(mode === 'chat' ? 'voice' : 'chat')}
-                  className="size-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                  className={`size-8 rounded-full flex items-center justify-center transition-all ${mode === 'voice' ? 'bg-white text-primary' : 'bg-white/20 hover:bg-white/30'}`}
                   title={mode === 'chat' ? "Switch to Voice" : "Switch to Chat"}
                 >
                    <span className="material-symbols-outlined text-sm">{mode === 'chat' ? 'mic' : 'chat'}</span>
@@ -252,20 +297,35 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
           <div className="flex-1 overflow-hidden relative bg-gray-50 dark:bg-black/20">
              {mode === 'chat' ? (
                <div className="absolute inset-0 flex flex-col">
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  <div className="flex-1 overflow-y-auto p-4 space-y-6">
                      {messages.map((msg, i) => (
-                       <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[85%] p-3 rounded-2xl text-sm font-medium leading-relaxed ${
-                            msg.role === 'user' 
-                            ? 'bg-primary text-white rounded-tr-sm' 
-                            : 'bg-white dark:bg-gray-800 text-text-main-light dark:text-text-main-dark border border-gray-100 dark:border-white/5 rounded-tl-sm shadow-sm'
-                          }`}>
-                            {msg.text}
+                       <div key={i} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                          <div className={`flex gap-2 max-w-[90%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                              {/* Avatar */}
+                              <div className={`size-8 rounded-full flex items-center justify-center flex-shrink-0 mt-auto shadow-sm ${
+                                  msg.role === 'user' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-700 text-primary'
+                              }`}>
+                                  <span className="material-symbols-outlined text-sm">
+                                      {msg.role === 'user' ? 'person' : 'smart_toy'}
+                                  </span>
+                              </div>
+
+                              <div className={`p-4 rounded-2xl text-sm font-medium leading-relaxed shadow-sm whitespace-pre-wrap ${
+                                msg.role === 'user' 
+                                ? 'bg-primary text-white rounded-tr-sm' 
+                                : 'bg-white dark:bg-gray-800 text-text-main-light dark:text-text-main-dark border border-gray-100 dark:border-white/5 rounded-tl-sm'
+                              }`}>
+                                {msg.text}
+                              </div>
                           </div>
+                          <span className="text-[9px] text-text-sec-light dark:text-text-sec-dark mt-1 px-12 opacity-50">
+                             {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                        </div>
                      ))}
+                     
                      {isChatLoading && (
-                       <div className="flex justify-start">
+                       <div className="flex justify-start pl-10">
                          <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 dark:border-white/5 flex gap-1.5 items-center">
                             <span className="size-1.5 bg-primary/40 rounded-full animate-bounce"></span>
                             <span className="size-1.5 bg-primary/40 rounded-full animate-bounce delay-100"></span>
@@ -274,48 +334,81 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
                          </div>
                        </div>
                      )}
+                     
+                     {/* Suggestions Grid - Show only when chat is "empty" (just welcome message) */}
+                     {messages.length === 1 && (
+                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                             {SUGGESTIONS.map((suggestion, idx) => (
+                                 <button 
+                                     key={idx}
+                                     onClick={() => handleSendMessage(suggestion.text)}
+                                     className="p-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-white/10 transition-all text-left flex items-center gap-3 group active:scale-[0.98]"
+                                 >
+                                     <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                                         <span className="material-symbols-outlined text-lg">{suggestion.icon}</span>
+                                     </div>
+                                     <span className="text-xs font-bold text-text-main-light dark:text-text-main-dark">{suggestion.text}</span>
+                                 </button>
+                             ))}
+                         </div>
+                     )}
+
                      <div ref={messagesEndRef} />
                   </div>
-                  <form onSubmit={handleSendMessage} className="p-4 bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-white/5 shrink-0">
-                     <div className="flex gap-2">
+                  
+                  <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="p-4 bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-white/5 shrink-0">
+                     <div className="flex gap-2 relative">
                         <input 
                           type="text" 
                           value={input}
                           onChange={(e) => setInput(e.target.value)}
-                          placeholder="Ask about accessibility or trips..."
-                          className="flex-1 h-12 bg-gray-100 dark:bg-white/5 rounded-xl px-4 text-sm focus:ring-2 focus:ring-primary outline-none transition-all dark:text-white"
+                          placeholder="Type your question..."
+                          className="flex-1 h-12 bg-gray-100 dark:bg-white/5 rounded-2xl pl-4 pr-12 text-sm focus:ring-2 focus:ring-primary outline-none transition-all dark:text-white"
                         />
-                        <button type="submit" className="size-12 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all">
+                        <button 
+                            type="submit" 
+                            disabled={!input.trim() || isChatLoading}
+                            className="absolute right-1 top-1 bottom-1 size-10 bg-white dark:bg-white/10 text-primary rounded-xl flex items-center justify-center shadow-sm hover:bg-primary hover:text-white transition-all disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-primary"
+                        >
                            <span className="material-symbols-outlined">send</span>
                         </button>
                      </div>
                   </form>
                </div>
              ) : (
-               <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                  <div className={`relative size-24 rounded-full flex items-center justify-center mb-8 transition-all duration-300 ${isVoiceActive ? 'bg-red-500 shadow-2xl shadow-red-500/30' : 'bg-primary shadow-xl shadow-primary/30'}`}>
-                     <span className="material-symbols-outlined text-5xl text-white">
+               <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-gray-50 to-white dark:from-black/20 dark:to-surface-dark">
+                  <div className={`relative size-32 rounded-full flex items-center justify-center mb-8 transition-all duration-500 ${
+                      isVoiceActive 
+                      ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] scale-110' 
+                      : 'bg-primary shadow-xl shadow-primary/30'
+                  }`}>
+                     <span className="material-symbols-outlined text-6xl text-white z-10">
                         {isVoiceActive ? 'graphic_eq' : 'mic'}
                      </span>
+                     
+                     {/* Dynamic Waves */}
                      {isVoiceActive && (
-                        <div className="absolute inset-0 rounded-full border-2 border-white/50 animate-ping"></div>
+                        <>
+                           <div className="absolute inset-0 rounded-full border-2 border-white/50 animate-[ping_1.5s_ease-in-out_infinite]"></div>
+                           <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-[ping_2s_ease-in-out_infinite] delay-300"></div>
+                        </>
                      )}
                   </div>
                   
-                  <h3 className="text-xl font-bold font-display mb-2 text-text-main-light dark:text-text-main-dark">
+                  <h3 className="text-2xl font-black font-display mb-2 text-text-main-light dark:text-text-main-dark">
                     {isVoiceActive 
-                      ? (voiceStatus === 'listening' ? "I'm listening..." : "Speaking...") 
+                      ? (voiceStatus === 'listening' ? "I'm Listening..." : "Speaking...") 
                       : "Tap to Speak"}
                   </h3>
-                  <p className="text-sm text-text-sec-light dark:text-text-sec-dark max-w-xs mx-auto mb-8">
+                  <p className="text-sm text-text-sec-light dark:text-text-sec-dark max-w-xs mx-auto mb-10 leading-relaxed font-medium">
                      {isVoiceActive 
-                      ? "Ask me to navigate to home, trips, or guides." 
-                      : "I can help you navigate hands-free."}
+                      ? "Ask me to navigate to home, trips, or guides. I'm listening." 
+                      : "Experience hands-free navigation. Just tap the button to start."}
                   </p>
 
                   <button 
                     onClick={toggleVoiceSession}
-                    className={`px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg transition-all ${
+                    className={`px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs shadow-xl transition-all transform hover:scale-105 active:scale-95 ${
                        isVoiceActive 
                        ? 'bg-white dark:bg-white/10 text-red-500 border border-red-500/20 hover:bg-red-50' 
                        : 'bg-primary text-white hover:bg-primary/90'
@@ -326,12 +419,15 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
 
                   {/* Visualizer Bar */}
                   {isVoiceActive && (
-                     <div className="flex items-end justify-center gap-1 h-12 mt-12 w-full max-w-[200px]">
-                        {[...Array(5)].map((_, i) => (
+                     <div className="flex items-end justify-center gap-1.5 h-16 mt-12 w-full max-w-[240px]">
+                        {[...Array(8)].map((_, i) => (
                            <div 
                               key={i} 
-                              className="w-2 bg-primary/50 rounded-full transition-all duration-75"
-                              style={{ height: `${Math.max(10, Math.random() * volume)}%` }}
+                              className="w-2 bg-primary rounded-full transition-all duration-75 ease-out shadow-lg shadow-primary/20"
+                              style={{ 
+                                  height: `${Math.max(15, Math.random() * volume * 1.5)}%`,
+                                  opacity: 0.5 + (volume / 255)
+                              }}
                            ></div>
                         ))}
                      </div>

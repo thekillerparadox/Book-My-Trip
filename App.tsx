@@ -13,6 +13,8 @@ import { AIVisualizer } from './components/AIVisualizer';
 import { ReviewsSection } from './components/ReviewsSection';
 import { AccessibilityPanel } from './components/AccessibilityPanel';
 import { AccessibilityAgent } from './components/AccessibilityAgent';
+import { PartnersSection } from './components/PartnersSection';
+import { MobileAppPromo } from './components/MobileAppPromo';
 import { AppView, Trip } from './types';
 
 const MOCK_TRIPS: Trip[] = [
@@ -150,6 +152,8 @@ const App: React.FC = () => {
               <AIVisualizer />
               <InternationalGateway onBook={handleBookTrip} />
               <ReviewsSection />
+              <PartnersSection />
+              <MobileAppPromo />
               <Newsletter />
             </div>
           </div>
