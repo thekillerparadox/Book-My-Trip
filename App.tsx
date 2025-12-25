@@ -12,8 +12,7 @@ import { TripsSection } from './components/TripsSection';
 import { AIVisualizer } from './components/AIVisualizer';
 import { ReviewsSection } from './components/ReviewsSection';
 import { AccessibilityPanel } from './components/AccessibilityPanel';
-import { ChatBot } from './components/ChatBot';
-import { VoiceAssistant } from './components/VoiceAssistant';
+import { AccessibilityAgent } from './components/AccessibilityAgent';
 import { AppView, Trip } from './types';
 
 const MOCK_TRIPS: Trip[] = [
@@ -159,7 +158,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center overflow-x-hidden">
       <Navbar currentView={currentView} setView={setCurrentView} />
       <main className="w-full flex flex-col items-center min-h-[100vh]">
         {renderContent()}
@@ -168,10 +167,7 @@ const App: React.FC = () => {
       
       {/* Accessibility Features */}
       <AccessibilityPanel />
-      {/* Voice Assistant - Live API */}
-      <VoiceAssistant setView={setCurrentView} />
-      {/* Text Chatbot */}
-      <ChatBot />
+      <AccessibilityAgent setView={setCurrentView} />
     </div>
   );
 };
