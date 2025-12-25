@@ -60,7 +60,7 @@ export const TrendingSection: React.FC = () => {
 
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      
+      // Using Gemini 3 Pro with Thinking Mode
       const response = await ai.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: `Analyze ${destName} as a travel destination for the current season. 

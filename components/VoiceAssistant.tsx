@@ -10,7 +10,6 @@ interface TranscriptItem {
   id: string;
   sender: 'user' | 'ai';
   text: string;
-  isPartial?: boolean;
 }
 
 // Function definition for Voice Navigation
@@ -32,8 +31,7 @@ const navigationTool: FunctionDeclaration = {
 
 export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
   const [isActive, setIsActive] = useState(false);
-  const [isTalking, setIsTalking] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'speaking'>('idle');
+  const [status, setStatus] = useState<'idle' | 'listening' | 'speaking'>('idle');
   const [volume, setVolume] = useState(0);
   const [transcripts, setTranscripts] = useState<TranscriptItem[]>([]);
   
@@ -45,6 +43,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
   const audioStack = useRef<Array<AudioBuffer>>([]);
   const isPlayingRef = useRef(false);
   const nextStartTimeRef = useRef(0);
+  const sessionRef = useRef<any>(null);
 
   // Auto-scroll transcript
   useEffect(() => {
@@ -58,6 +57,9 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
     return () => {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       if (audioContextRef.current) audioContextRef.current.close();
+      if (sessionRef.current) {
+        // Live session close not strictly explicitly available on session object, usually controlled via component unmount logic
+      }
     };
   }, []);
 
@@ -89,7 +91,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
   const playNextBuffer = (ctx: AudioContext) => {
     if (audioStack.current.length === 0) {
       isPlayingRef.current = false;
-      setStatus('listening'); // Back to listening after speaking
+      setStatus('listening');
       return;
     }
     
@@ -111,7 +113,6 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
     nextStartTimeRef.current += buffer.duration;
     
     source.onended = () => {
-       setIsTalking(false);
        playNextBuffer(ctx);
     };
   };
@@ -127,13 +128,14 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
 
   const toggleSession = async () => {
     if (isActive) {
-      window.location.reload(); // Simple reset for demo stability
+      // Hard reset for safety
+      window.location.reload(); 
       return;
     }
 
     setIsActive(true);
     setStatus('idle');
-    setTranscripts([{ id: 'init', sender: 'ai', text: 'Hello! I can help you navigate or plan your trip. Just ask.', isPartial: false }]);
+    setTranscripts([{ id: 'init', sender: 'ai', text: 'Hello! I am your AI travel assistant. Ask me anything!' }]);
 
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
     audioContextRef.current = ctx;
@@ -157,8 +159,6 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
         },
         tools: [{ functionDeclarations: [navigationTool] }],
         systemInstruction: "You are an accessible travel assistant. Speak clearly. You can navigate the app. If the user says 'Go to trips', call the navigate tool.",
-        inputAudioTranscription: { model: "google-1.0-pro" }, // Enable User Transcription
-        outputAudioTranscription: { model: "google-1.0-pro" } // Enable AI Transcription
       };
 
       const sessionPromise = ai.live.connect({
@@ -182,6 +182,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
               const b64 = btoa(binary);
 
               sessionPromise.then(session => {
+                  sessionRef.current = session;
                   session.sendRealtimeInput({
                       media: { mimeType: 'audio/pcm;rate=16000', data: b64 }
                   });
@@ -191,16 +192,14 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
             processor.connect(ctx.destination);
           },
           onmessage: async (msg: LiveServerMessage) => {
-            // 1. Handle Tool Calls (Navigation)
+            // Handle Tool Calls
             if (msg.toolCall) {
-              setStatus('processing');
               for (const call of msg.toolCall.functionCalls) {
                 if (call.name === 'navigate') {
                   const view = (call.args as any).view;
-                  console.log("Navigating to:", view);
                   setView(view as AppView);
+                  setTranscripts(prev => [...prev, { id: Date.now().toString(), sender: 'ai', text: `Navigating to ${view}...` }]);
                   
-                  // Send confirmation back to model
                   sessionPromise.then(session => session.sendToolResponse({
                     functionResponses: [{
                       id: call.id,
@@ -212,50 +211,14 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
               }
             }
 
-            // 2. Handle Transcriptions (Captions)
-            const serverContent = msg.serverContent;
-            if (serverContent) {
-              if (serverContent.modelTurn) {
-                  // If model is starting a new turn, prepare to speak
-                  setStatus('processing');
-              }
-
-              // User Transcription (Input)
-              if (serverContent.inputTranscription) {
-                  // For simplicity, we just show the final result or update the last user message
-                  // In a real app, you'd debounce this or handle partials more gracefully
-                  // Here we only log 'turnComplete' for stability or check partial
-              }
-
-              // Output Transcription (AI) -> We can get text from modelTurn parts if available in some models,
-              // but typically we rely on `serverContent.modelTurn.parts` containing text if modality includes text.
-              // However, Live API often separates audio and text. 
-              // We will rely on turnComplete events to sync transcripts or use the `outputAudioTranscription` field.
-            }
-            
-            // NOTE: The current Live API preview structure for transcription is evolving. 
-            // For robust accessibility, we simulate the transcription update based on events
-            // if the exact text field isn't populated in every chunk.
-            
-            // *Hack for Demo*: If we receive audio, we assume AI is talking.
-            // In a production app, you would parse `msg.serverContent?.modelTurn?.parts` looking for text.
-            
-            // 3. Handle Audio Output
+            // Handle Audio Output
             const audioData = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
             if (audioData) {
-               setIsTalking(true);
                setStatus('speaking');
                const arrayBuffer = base64ToArrayBuffer(audioData);
                const audioBuffer = await decodeAudioData(arrayBuffer, outCtx);
                audioStack.current.push(audioBuffer);
                if (!isPlayingRef.current) playNextBuffer(outCtx);
-            }
-            
-            // 4. Handle Turn Completion (Sync Transcripts)
-            if (msg.serverContent?.turnComplete) {
-                // Since Live API splits audio/text, we might not get perfect text stream in this version.
-                // We add a placeholder or the actual text if present.
-                // Real implementation would inspect `msg` deeply for `outputTranscription`.
             }
           },
           onclose: () => { setIsActive(false); setStatus('idle'); },
@@ -272,15 +235,11 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
 
   return (
     <>
-      {/* Live Transcript / Accessibility Panel */}
       {isActive && (
         <div 
-          role="dialog"
-          aria-label="Voice Assistant Conversation"
-          className="fixed bottom-24 right-6 z-[100] w-80 md:w-96 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl border-2 border-primary/20 overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 transition-all duration-300"
+          className="fixed bottom-24 right-6 z-[100] w-80 md:w-96 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl border-2 border-primary/20 overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 transition-all duration-300 glass-panel"
           style={{ maxHeight: '60vh' }}
         >
-          {/* Header */}
           <div className="bg-primary p-4 flex items-center justify-between text-white">
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined animate-pulse">
@@ -288,7 +247,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
               </span>
               <div>
                 <h3 className="text-sm font-black uppercase tracking-widest">Travel Assistant</h3>
-                <p className="text-[10px] font-medium opacity-80" aria-live="polite">
+                <p className="text-[10px] font-medium opacity-80">
                   {status === 'listening' ? 'Listening...' : status === 'speaking' ? 'Speaking...' : 'Thinking...'}
                 </p>
               </div>
@@ -296,25 +255,15 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
             <button 
               onClick={toggleSession}
               className="size-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-              aria-label="Close Assistant"
             >
               <span className="material-symbols-outlined text-sm">close</span>
             </button>
           </div>
 
-          {/* Transcript Area (Scrollable) */}
           <div 
             ref={transcriptListRef}
             className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-black/20"
-            role="log"
-            aria-live="polite"
           >
-            {transcripts.length === 0 && (
-               <p className="text-center text-xs text-gray-400 italic mt-4">
-                 Try saying: "Go to tour guides" or "Plan a trip to Paris"
-               </p>
-            )}
-            
             {transcripts.map((t, i) => (
               <div key={i} className={`flex ${t.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div 
@@ -329,8 +278,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
               </div>
             ))}
             
-            {/* Visualizer inside panel */}
-            <div className="h-12 flex items-center justify-center gap-1 mt-2 opacity-50">
+            <div className="h-16 flex items-center justify-center gap-1 mt-2">
                 {[...Array(8)].map((_, i) => (
                     <div 
                         key={i}
@@ -340,17 +288,9 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
                 ))}
             </div>
           </div>
-          
-          {/* Helper Text */}
-          <div className="p-3 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 text-center">
-             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">
-               Voice Navigation Active
-             </p>
-          </div>
         </div>
       )}
 
-      {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6 z-[100]">
         <button 
           onClick={toggleSession}
@@ -359,14 +299,11 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ setView }) => {
               ? 'bg-red-500 text-white' 
               : 'bg-primary text-white'
           }`}
-          aria-label={isActive ? "Stop Voice Assistant" : "Start Voice Assistant"}
-          aria-expanded={isActive}
         >
             <span className="material-symbols-outlined text-3xl">
               {isActive ? 'mic_off' : 'mic'}
             </span>
             
-            {/* Ping animation when active but idle */}
             {isActive && status === 'listening' && (
               <span className="absolute inset-0 rounded-full border-2 border-red-500 animate-ping opacity-75"></span>
             )}

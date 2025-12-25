@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { INTERNATIONAL_DESTINATIONS } from '../constants';
 import { FeaturedDestination, Trip } from '../types';
-import { GoogleGenAI, Modality, Type } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 
 interface InternationalGatewayProps {
   onBook: (trip: Trip) => void;
@@ -129,6 +129,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
     setAiResponse(null);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // IMPORTANT: Use gemini-3-flash-preview with googleSearch for up-to-date info
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `Provide the latest travel requirements, news, and trending cultural tips for visiting ${selectedDest.name} in 2025. Include current weather conditions and event highlights.`,
@@ -197,6 +198,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
     setAiResponse(null);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // IMPORTANT: Use gemini-3-pro-preview with thinking budget for complex itineraries
       const response = await ai.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: `Create a professional 7-day high-end itinerary for ${selectedDest.name}. Focus on unique cultural experiences, hidden culinary spots, and luxury logistics. Plan for a diverse range of activities.`,

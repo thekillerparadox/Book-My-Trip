@@ -136,6 +136,7 @@ export const TourGuideSection: React.FC<TourGuideSectionProps> = ({ onBook }) =>
         bio: g.bio
       })));
 
+      // Use Gemini 3 Pro with Thinking Mode
       const response = await ai.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: `I have a user searching for: "${searchTerm}".

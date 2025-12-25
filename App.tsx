@@ -13,7 +13,71 @@ import { AIVisualizer } from './components/AIVisualizer';
 import { ReviewsSection } from './components/ReviewsSection';
 import { AccessibilityPanel } from './components/AccessibilityPanel';
 import { ChatBot } from './components/ChatBot';
+import { VoiceAssistant } from './components/VoiceAssistant';
 import { AppView, Trip } from './types';
+
+const MOCK_TRIPS: Trip[] = [
+  {
+    id: 'trip_1',
+    destinationName: 'Santorini, Greece',
+    tripTitle: 'Anniversary Getaway',
+    image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=1200&auto=format&fit=crop',
+    dates: 'Oct 15 - Oct 22',
+    travelers: '2 Adults',
+    price: '₹1,20,000',
+    type: 'Vacation Package',
+    bookedAt: Date.now() - 10000000,
+    status: 'completed'
+  },
+  {
+    id: 'trip_2',
+    destinationName: 'Kyoto, Japan',
+    tripTitle: 'Cultural Exploration',
+    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=1200&auto=format&fit=crop',
+    dates: 'Nov 05 - Nov 12',
+    travelers: '1 Adult',
+    price: '₹1,15,000',
+    type: 'Solo Trip',
+    bookedAt: Date.now() - 5000000,
+    status: 'completed'
+  },
+  {
+    id: 'trip_3',
+    destinationName: 'Maldives',
+    tripTitle: 'Ocean Paradise',
+    image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?q=80&w=1200&auto=format&fit=crop',
+    dates: 'Dec 01 - Dec 07',
+    travelers: '2 Adults, 1 Child',
+    price: '₹2,50,000',
+    type: 'Luxury Resort',
+    bookedAt: Date.now() - 2000000,
+    status: 'upcoming'
+  },
+  {
+    id: 'trip_4',
+    destinationName: 'New York City, USA',
+    tripTitle: 'Business Conference',
+    image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1200&auto=format&fit=crop',
+    dates: 'Sep 10 - Sep 15',
+    travelers: '1 Adult',
+    price: '₹1,80,000',
+    type: 'Business Class',
+    bookedAt: Date.now() - 15000000,
+    status: 'completed'
+  },
+  {
+    id: 'trip_5',
+    destinationName: 'Paris, France',
+    tripTitle: 'Summer Vacation',
+    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1200&auto=format&fit=crop',
+    dates: 'Aug 01 - Aug 10',
+    travelers: '2 Adults, 2 Children',
+    price: '₹2,40,000',
+    type: 'Family Suite',
+    bookedAt: Date.now() - 20000000,
+    status: 'cancelled'
+  }
+];
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>('home');
@@ -24,17 +88,34 @@ const App: React.FC = () => {
     const savedTrips = localStorage.getItem('bmt_trips');
     if (savedTrips) {
       try {
-        setTrips(JSON.parse(savedTrips));
+        const parsed = JSON.parse(savedTrips);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+           setTrips(parsed);
+        } else {
+           setTrips(MOCK_TRIPS);
+           localStorage.setItem('bmt_trips', JSON.stringify(MOCK_TRIPS));
+        }
       } catch (e) {
         console.error("Failed to parse saved trips", e);
+        setTrips(MOCK_TRIPS);
+        localStorage.setItem('bmt_trips', JSON.stringify(MOCK_TRIPS));
       }
+    } else {
+      setTrips(MOCK_TRIPS);
+      localStorage.setItem('bmt_trips', JSON.stringify(MOCK_TRIPS));
     }
   }, []);
 
   const handleBookTrip = (trip: Trip) => {
-    const updatedTrips = [trip, ...trips];
+    // Ensure status is set for new bookings
+    const newTrip = { ...trip, status: trip.status || 'upcoming' };
+    const updatedTrips = [newTrip, ...trips];
     setTrips(updatedTrips);
     localStorage.setItem('bmt_trips', JSON.stringify(updatedTrips));
+    // Automatically switch to trips view to show the new booking
+    if (window.confirm(`Booking Confirmed! View your trip to ${trip.destinationName}?`)) {
+      setCurrentView('trips');
+    }
   };
 
   const handleRemoveTrip = (id: string) => {
@@ -59,13 +140,11 @@ const App: React.FC = () => {
           <div className="w-full flex flex-col items-center">
             <Hero onBook={handleBookTrip} />
             {/* 
-                Margin top calculation:
-                Mobile: Widget moved to 75% out. Widget height approx 370px. 0.75*370 = 277px. 
-                        mt-[330px] gives ~50px buffer.
-                Desktop: Widget moved to 75% out. Widget height approx 250px. 0.75*250 = 188px.
-                        mt-[230px] gives ~40px buffer.
+                Increased margin top for better spacing between Hero widget and content.
+                Mobile: Widget ~370px height, translated 75%. Protrudes ~280px. mt-[400px] gives ~120px gap.
+                Desktop: Widget ~250px height, translated 75%. Protrudes ~190px. mt-[320px] gives ~130px gap.
             */}
-            <div className="w-full flex flex-col items-center gap-6 md:gap-8 mt-[330px] md:mt-[230px]">
+            <div className="w-full flex flex-col items-center gap-6 md:gap-8 mt-[400px] md:mt-[320px]">
               <MoodSection />
               <TrendingSection />
               <TripPlanner onBook={handleBookTrip} />
@@ -89,6 +168,9 @@ const App: React.FC = () => {
       
       {/* Accessibility Features */}
       <AccessibilityPanel />
+      {/* Voice Assistant - Live API */}
+      <VoiceAssistant setView={setCurrentView} />
+      {/* Text Chatbot */}
       <ChatBot />
     </div>
   );

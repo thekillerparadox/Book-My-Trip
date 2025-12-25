@@ -36,9 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
   }, [mobileMenuOpen]);
 
   const navLinks: NavItem[] = [
-    { label: 'Destinations', view: 'home', icon: 'public', sectionId: 'destinations' },
     { label: 'Tour Guides', view: 'guides', icon: 'person_pin_circle' },
-    { label: 'Flights', view: 'home', icon: 'flight', sectionId: 'flights' },
     { label: 'My Trips', view: 'trips', icon: 'luggage' },
   ];
 
@@ -88,18 +86,18 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
       <header
         className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 border-b ${
           isScrolled || mobileMenuOpen
-            ? 'bg-white/95 dark:bg-[#0A0C10]/95 backdrop-blur-md border-gray-200/50 dark:border-white/5 py-3 shadow-sm'
-            : 'bg-transparent border-transparent py-4 md:py-6'
+            ? 'bg-white/95 dark:bg-[#0A0C10]/95 backdrop-blur-md border-gray-200/50 dark:border-white/5 py-4 shadow-sm'
+            : 'bg-transparent border-transparent py-5 md:py-8'
         }`}
       >
-        <div className="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center justify-between">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex items-center justify-between gap-6">
           {/* Logo */}
           <div
-            className="flex items-center gap-3 cursor-pointer group select-none"
+            className="flex items-center gap-4 cursor-pointer group select-none flex-shrink-0"
             onClick={() => handleNavClick({ label: 'Home', view: 'home', icon: 'home', sectionId: 'flights' })}
           >
-            {/* Minimal Vector Compass Logo */}
-            <div className="relative size-9 md:size-10 flex items-center justify-center">
+            {/* Minimal Vector Compass Logo with Continuous Animation */}
+            <div className="relative size-10 md:size-11 flex items-center justify-center">
                <svg 
                  viewBox="0 0 24 24" 
                  fill="none" 
@@ -110,21 +108,21 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
                   <path 
                     d="M12 4L14 12L12 20L10 12L12 4Z" 
                     fill="currentColor" 
-                    className="origin-center transition-transform duration-[2s] ease-in-out group-hover:rotate-[360deg]" 
+                    className="origin-center animate-compass-spin" 
                   />
                   <circle cx="12" cy="12" r="1" fill="currentColor" className="text-white dark:text-black" />
                </svg>
             </div>
             
             <div className="flex flex-col leading-none justify-center gap-0.5">
-               <span className={`text-lg md:text-xl font-black tracking-tighter font-display transition-colors ${isScrolled || mobileMenuOpen ? 'text-text-main-light dark:text-text-main-dark' : 'text-white shadow-black/20 drop-shadow-md'}`}>
+               <span className={`text-xl md:text-2xl font-black tracking-tighter font-display transition-colors ${isScrolled || mobileMenuOpen ? 'text-text-main-light dark:text-text-main-dark' : 'text-white shadow-black/20 drop-shadow-md'}`}>
                   Book<span className="text-primary">My</span>Trip
                </span>
             </div>
           </div>
 
           {/* Desktop Nav */}
-          <nav className={`hidden lg:flex items-center gap-1.5 p-1.5 rounded-full border backdrop-blur-xl transition-all duration-300 ${
+          <nav className={`hidden lg:flex items-center gap-2 p-1.5 rounded-full border backdrop-blur-xl transition-all duration-300 ${
              isScrolled 
              ? 'bg-gray-100/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10 shadow-inner' 
              : 'bg-black/20 border-white/10 shadow-lg'
@@ -135,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
                 <button
                   key={link.label}
                   onClick={() => handleNavClick(link)}
-                  className={`relative px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 overflow-hidden group ${
+                  className={`relative px-6 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 overflow-hidden group ${
                     isActive
                       ? 'bg-white dark:bg-gray-800 text-primary shadow-sm scale-100'
                       : isScrolled 
@@ -156,7 +154,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
           </nav>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
             {/* Expandable Search */}
             <div className={`flex items-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
                 searchOpen 
@@ -178,14 +176,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
                     : 'text-white'
                 }`}
                >
-                 <span className="material-symbols-outlined text-[20px]">search</span>
+                 <span className="material-symbols-outlined text-[22px]">search</span>
                </button>
             </div>
 
             <div className={`h-6 w-px hidden md:block ${isScrolled ? 'bg-gray-200 dark:bg-white/10' : 'bg-white/20'}`}></div>
 
             {/* Auth Buttons - Desktop */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-3">
               <button className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
                   isScrolled 
                   ? 'text-text-sec-light dark:text-text-sec-dark hover:text-primary hover:bg-primary/5' 
@@ -193,7 +191,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
               }`}>
                 Log In
               </button>
-              <button className="px-5 py-2.5 bg-primary text-white rounded-xl text-xs font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 hover:-translate-y-0.5 transition-all active:scale-95 flex items-center gap-2 group">
+              <button className="px-6 py-2.5 bg-primary text-white rounded-xl text-xs font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 hover:-translate-y-0.5 transition-all active:scale-95 flex items-center gap-2 group">
                 <span>Sign Up</span>
                 <span className="material-symbols-outlined text-xs group-hover:translate-x-1 transition-transform">arrow_forward</span>
               </button>
@@ -202,13 +200,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
             {/* Mobile Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`lg:hidden size-10 flex items-center justify-center rounded-full transition-all active:scale-90 ${
+              className={`lg:hidden size-12 flex items-center justify-center rounded-full transition-all active:scale-90 ${
                   isScrolled || mobileMenuOpen
                   ? 'bg-gray-100 dark:bg-white/10 text-text-main-light dark:text-text-main-dark hover:bg-gray-200 dark:hover:bg-white/20'
                   : 'bg-white/10 text-white backdrop-blur-md hover:bg-white/20'
               }`}
             >
-              <span className="material-symbols-outlined text-[24px] transition-transform duration-300" style={{ transform: mobileMenuOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+              <span className="material-symbols-outlined text-[26px] transition-transform duration-300" style={{ transform: mobileMenuOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>
                 {mobileMenuOpen ? 'close' : 'menu'}
               </span>
             </button>

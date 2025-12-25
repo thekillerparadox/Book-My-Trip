@@ -56,6 +56,7 @@ export interface Trip {
   type: string;
   bookedAt: number;
   tripTitle?: string; // New field for custom trip name
+  status?: 'upcoming' | 'completed' | 'cancelled'; // Added status for enhanced trips section
 }
 
 export interface ReviewResponse {

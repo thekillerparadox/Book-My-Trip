@@ -71,6 +71,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
       Select ONE specific destination that perfectly balances weather, crowd factors, and unique experiences.
       `;
 
+      // Using Gemini 3 Pro with Thinking Budget
       const response = await ai.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: prompt,
@@ -182,7 +183,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
 
   return (
     <section className="w-full max-w-[1200px] px-4 md:px-6 py-4">
-      <div className="bg-white dark:bg-surface-dark rounded-[3rem] shadow-2xl border border-gray-100 dark:border-white/5 overflow-hidden relative">
+      <div className="bg-white dark:bg-surface-dark rounded-[3rem] shadow-2xl border border-gray-100 dark:border-white/5 overflow-hidden relative glass-panel">
         {/* Background Decor */}
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-accent to-secondary"></div>
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
