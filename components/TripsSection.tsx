@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Trip } from '../types';
 
@@ -34,15 +35,21 @@ export const TripsSection: React.FC<TripsSectionProps> = ({ trips, onRemove, onG
   const uniqueCountries = new Set(activeTrips.map(t => t.destinationName.split(',').pop()?.trim())).size;
 
   const getStatusColor = (status?: string) => {
-    if (status === 'completed') return 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400';
-    if (status === 'cancelled') return 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400';
-    return 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400';
+    if (status === 'completed') return 'bg-emerald-500/20 text-emerald-100 border-emerald-500/30';
+    if (status === 'cancelled') return 'bg-red-500/20 text-red-100 border-red-500/30';
+    return 'bg-blue-500/20 text-blue-100 border-blue-500/30';
   };
 
   const getStatusLabel = (status?: string) => {
     if (status === 'completed') return 'Completed';
     if (status === 'cancelled') return 'Cancelled';
     return 'Upcoming';
+  };
+
+  const getStatusIcon = (status?: string) => {
+    if (status === 'completed') return 'check_circle';
+    if (status === 'cancelled') return 'cancel';
+    return 'hourglass_top';
   };
 
   return (
@@ -137,9 +144,10 @@ export const TripsSection: React.FC<TripsSectionProps> = ({ trips, onRemove, onG
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
                 
                 <div className="absolute top-4 left-4 flex gap-2">
-                   <span className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${getStatusColor(trip.status)} shadow-lg`}>
-                      {getStatusLabel(trip.status)}
-                   </span>
+                   <div className={`px-3 py-1.5 rounded-full border backdrop-blur-md shadow-lg flex items-center gap-1.5 ${getStatusColor(trip.status)}`}>
+                      <span className="material-symbols-outlined text-sm filled">{getStatusIcon(trip.status)}</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest">{getStatusLabel(trip.status)}</span>
+                   </div>
                 </div>
 
                 <div className="absolute bottom-4 left-4 right-4 text-white">
@@ -212,9 +220,10 @@ export const TripsSection: React.FC<TripsSectionProps> = ({ trips, onRemove, onG
                   </button>
                   <div className="absolute bottom-6 left-6 right-6 text-white">
                      <div className="flex items-center gap-3 mb-2">
-                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${getStatusColor(selectedTrip.status)}`}>
-                           {getStatusLabel(selectedTrip.status)}
-                        </span>
+                        <div className={`px-3 py-1 rounded-full border backdrop-blur-md flex items-center gap-1.5 ${getStatusColor(selectedTrip.status)}`}>
+                           <span className="material-symbols-outlined text-sm filled">{getStatusIcon(selectedTrip.status)}</span>
+                           <span className="text-[9px] font-black uppercase tracking-widest">{getStatusLabel(selectedTrip.status)}</span>
+                        </div>
                         <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[9px] font-bold uppercase tracking-widest">
                            {selectedTrip.type}
                         </span>

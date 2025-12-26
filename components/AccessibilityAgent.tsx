@@ -42,6 +42,19 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<'chat' | 'voice'>('chat');
   
+  // Draggable State
+  const [position, setPosition] = useState({ x: -1, y: -1 }); // -1 indicates not initialized
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Initialize position to bottom-right on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setPosition({ x: window.innerWidth - 80, y: window.innerHeight - 80 });
+    }
+  }, []);
+
   // Chat State
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -57,6 +70,44 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number>(0);
   
+  // Draggable Handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDraggingRef.current = false;
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    
+    const moveHandler = (moveEvent: MouseEvent) => {
+      const dx = moveEvent.clientX - dragStartRef.current.x;
+      const dy = moveEvent.clientY - dragStartRef.current.y;
+      
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        isDraggingRef.current = true;
+      }
+
+      if (isDraggingRef.current) {
+         // Calculate new position directly from mouse
+         // Center the button on the mouse cursor roughly
+         setPosition({ 
+            x: moveEvent.clientX - 32, // 32 is half button size (64px)
+            y: moveEvent.clientY - 32 
+         });
+      }
+    };
+
+    const upHandler = () => {
+      window.removeEventListener('mousemove', moveHandler);
+      window.removeEventListener('mouseup', upHandler);
+    };
+
+    window.addEventListener('mousemove', moveHandler);
+    window.addEventListener('mouseup', upHandler);
+  };
+
+  const handleClick = () => {
+    if (!isDraggingRef.current) {
+      setIsOpen(!isOpen);
+    }
+  };
+
   // Init Chat Session
   useEffect(() => {
     if (isOpen && mode === 'chat' && !chatSession) {
@@ -237,203 +288,217 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
   return (
     <>
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-[999] size-14 md:size-16 rounded-full bg-primary text-white shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all group"
+        ref={buttonRef}
+        onMouseDown={handleMouseDown}
+        onClick={handleClick}
+        style={{ 
+            left: position.x !== -1 ? `${position.x}px` : undefined, 
+            top: position.y !== -1 ? `${position.y}px` : undefined,
+            position: 'fixed' 
+        }}
+        className={`z-[999] size-14 md:size-16 rounded-full bg-primary text-white shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform group cursor-move ${position.x === -1 ? 'bottom-6 right-6' : ''}`}
         aria-label="Toggle Accessibility Agent"
       >
-        <div className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20 group-hover:opacity-40"></div>
-        <span className="material-symbols-outlined text-3xl">support_agent</span>
+        <div className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20 group-hover:opacity-40 pointer-events-none"></div>
+        <span className="material-symbols-outlined text-3xl pointer-events-none">support_agent</span>
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-4 md:right-6 z-[999] w-[calc(100vw-2rem)] md:w-[400px] h-[600px] max-h-[80vh] bg-white dark:bg-surface-dark rounded-[2rem] shadow-2xl border border-gray-100 dark:border-white/10 flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300">
-          
-          {/* Header */}
-          <div className="bg-primary p-4 flex items-center justify-between text-white shrink-0 shadow-lg relative z-10">
-             <div className="flex items-center gap-3">
-               <div className="size-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md shadow-inner">
-                 <span className="material-symbols-outlined text-xl">smart_toy</span>
-               </div>
-               <div>
-                 <h3 className="font-bold text-sm">{AGENT_NAME} • Concierge</h3>
-                 <p className="text-[10px] opacity-80 uppercase tracking-wider font-bold flex items-center gap-1">
-                   {mode === 'chat' ? (
-                       <>
-                         <span className="size-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                         Thinking Mode Active
-                       </>
-                   ) : (
-                       <>
-                         <span className="size-1.5 rounded-full bg-red-400 animate-pulse"></span>
-                         Live Voice Active
-                       </>
-                   )}
-                 </p>
-               </div>
-             </div>
-             <div className="flex gap-2">
-                <button 
-                    onClick={handleClearChat}
-                    className="size-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-                    title="Clear Chat"
-                >
-                    <span className="material-symbols-outlined text-sm">delete</span>
-                </button>
-                <div className="h-8 w-px bg-white/20 mx-1"></div>
-                <button 
-                  onClick={() => setMode(mode === 'chat' ? 'voice' : 'chat')}
-                  className={`size-8 rounded-full flex items-center justify-center transition-all ${mode === 'voice' ? 'bg-white text-primary' : 'bg-white/20 hover:bg-white/30'}`}
-                  title={mode === 'chat' ? "Switch to Voice" : "Switch to Chat"}
-                >
-                   <span className="material-symbols-outlined text-sm">{mode === 'chat' ? 'mic' : 'chat'}</span>
-                </button>
-                <button onClick={() => setIsOpen(false)} className="size-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
-                  <span className="material-symbols-outlined text-sm">close</span>
-                </button>
-             </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-hidden relative bg-gray-50 dark:bg-black/20">
-             {mode === 'chat' ? (
-               <div className="absolute inset-0 flex flex-col">
-                  <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                     {messages.map((msg, i) => (
-                       <div key={i} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                          <div className={`flex gap-2 max-w-[90%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                              {/* Avatar */}
-                              <div className={`size-8 rounded-full flex items-center justify-center flex-shrink-0 mt-auto shadow-sm ${
-                                  msg.role === 'user' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-700 text-primary'
-                              }`}>
-                                  <span className="material-symbols-outlined text-sm">
-                                      {msg.role === 'user' ? 'person' : 'smart_toy'}
-                                  </span>
-                              </div>
-
-                              <div className={`p-4 rounded-2xl text-sm font-medium leading-relaxed shadow-sm whitespace-pre-wrap ${
-                                msg.role === 'user' 
-                                ? 'bg-primary text-white rounded-tr-sm' 
-                                : 'bg-white dark:bg-gray-800 text-text-main-light dark:text-text-main-dark border border-gray-100 dark:border-white/5 rounded-tl-sm'
-                              }`}>
-                                {msg.text}
-                              </div>
-                          </div>
-                          <span className="text-[9px] text-text-sec-light dark:text-text-sec-dark mt-1 px-12 opacity-50">
-                             {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                       </div>
-                     ))}
-                     
-                     {isChatLoading && (
-                       <div className="flex justify-start pl-10">
-                         <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 dark:border-white/5 flex gap-1.5 items-center">
-                            <span className="size-1.5 bg-primary/40 rounded-full animate-bounce"></span>
-                            <span className="size-1.5 bg-primary/40 rounded-full animate-bounce delay-100"></span>
-                            <span className="size-1.5 bg-primary/40 rounded-full animate-bounce delay-200"></span>
-                            <span className="text-[10px] text-text-sec-light dark:text-text-sec-dark ml-1">Thinking...</span>
-                         </div>
-                       </div>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 pointer-events-none">
+          {/* Modal Container - Pointer events auto enabled on contents */}
+          <div className="w-full md:w-[400px] h-[600px] max-h-[80vh] bg-white dark:bg-surface-dark rounded-[2rem] shadow-2xl border border-gray-100 dark:border-white/10 flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-300 pointer-events-auto">
+            
+            {/* Header */}
+            <div className="bg-primary p-4 flex items-center justify-between text-white shrink-0 shadow-lg relative z-10 cursor-move" 
+                 onMouseDown={(e) => { 
+                    // Optional: Make the window draggable via header too? 
+                    // For now, simpler to just have main button draggable or keep window centered.
+                 }}>
+               <div className="flex items-center gap-3">
+                 <div className="size-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md shadow-inner">
+                   <span className="material-symbols-outlined text-xl">smart_toy</span>
+                 </div>
+                 <div>
+                   <h3 className="font-bold text-sm">{AGENT_NAME} • Concierge</h3>
+                   <p className="text-[10px] opacity-80 uppercase tracking-wider font-bold flex items-center gap-1">
+                     {mode === 'chat' ? (
+                         <>
+                           <span className="size-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                           Thinking Mode Active
+                         </>
+                     ) : (
+                         <>
+                           <span className="size-1.5 rounded-full bg-red-400 animate-pulse"></span>
+                           Live Voice Active
+                         </>
                      )}
-                     
-                     {/* Suggestions Grid - Show only when chat is "empty" (just welcome message) */}
-                     {messages.length === 1 && (
-                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                             {SUGGESTIONS.map((suggestion, idx) => (
-                                 <button 
-                                     key={idx}
-                                     onClick={() => handleSendMessage(suggestion.text)}
-                                     className="p-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-white/10 transition-all text-left flex items-center gap-3 group active:scale-[0.98]"
-                                 >
-                                     <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                                         <span className="material-symbols-outlined text-lg">{suggestion.icon}</span>
-                                     </div>
-                                     <span className="text-xs font-bold text-text-main-light dark:text-text-main-dark">{suggestion.text}</span>
-                                 </button>
-                             ))}
-                         </div>
-                     )}
-
-                     <div ref={messagesEndRef} />
-                  </div>
-                  
-                  <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="p-4 bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-white/5 shrink-0">
-                     <div className="flex gap-2 relative">
-                        <input 
-                          type="text" 
-                          value={input}
-                          onChange={(e) => setInput(e.target.value)}
-                          placeholder="Type your question..."
-                          className="flex-1 h-12 bg-gray-100 dark:bg-white/5 rounded-2xl pl-4 pr-12 text-sm focus:ring-2 focus:ring-primary outline-none transition-all dark:text-white"
-                        />
-                        <button 
-                            type="submit" 
-                            disabled={!input.trim() || isChatLoading}
-                            className="absolute right-1 top-1 bottom-1 size-10 bg-white dark:bg-white/10 text-primary rounded-xl flex items-center justify-center shadow-sm hover:bg-primary hover:text-white transition-all disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-primary"
-                        >
-                           <span className="material-symbols-outlined">send</span>
-                        </button>
-                     </div>
-                  </form>
+                   </p>
+                 </div>
                </div>
-             ) : (
-               <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-gray-50 to-white dark:from-black/20 dark:to-surface-dark">
-                  <div className={`relative size-32 rounded-full flex items-center justify-center mb-8 transition-all duration-500 ${
-                      isVoiceActive 
-                      ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] scale-110' 
-                      : 'bg-primary shadow-xl shadow-primary/30'
-                  }`}>
-                     <span className="material-symbols-outlined text-6xl text-white z-10">
-                        {isVoiceActive ? 'graphic_eq' : 'mic'}
-                     </span>
-                     
-                     {/* Dynamic Waves */}
-                     {isVoiceActive && (
-                        <>
-                           <div className="absolute inset-0 rounded-full border-2 border-white/50 animate-[ping_1.5s_ease-in-out_infinite]"></div>
-                           <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-[ping_2s_ease-in-out_infinite] delay-300"></div>
-                        </>
-                     )}
-                  </div>
-                  
-                  <h3 className="text-2xl font-black font-display mb-2 text-text-main-light dark:text-text-main-dark">
-                    {isVoiceActive 
-                      ? (voiceStatus === 'listening' ? "I'm Listening..." : "Speaking...") 
-                      : "Tap to Speak"}
-                  </h3>
-                  <p className="text-sm text-text-sec-light dark:text-text-sec-dark max-w-xs mx-auto mb-10 leading-relaxed font-medium">
-                     {isVoiceActive 
-                      ? "Ask me to navigate to home, trips, or guides. I'm listening." 
-                      : "Experience hands-free navigation. Just tap the button to start."}
-                  </p>
-
+               <div className="flex gap-2">
                   <button 
-                    onClick={toggleVoiceSession}
-                    className={`px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs shadow-xl transition-all transform hover:scale-105 active:scale-95 ${
-                       isVoiceActive 
-                       ? 'bg-white dark:bg-white/10 text-red-500 border border-red-500/20 hover:bg-red-50' 
-                       : 'bg-primary text-white hover:bg-primary/90'
-                    }`}
+                      onClick={handleClearChat}
+                      className="size-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                      title="Clear Chat"
                   >
-                     {isVoiceActive ? 'End Session' : 'Start Conversation'}
+                      <span className="material-symbols-outlined text-sm">delete</span>
                   </button>
-
-                  {/* Visualizer Bar */}
-                  {isVoiceActive && (
-                     <div className="flex items-end justify-center gap-1.5 h-16 mt-12 w-full max-w-[240px]">
-                        {[...Array(8)].map((_, i) => (
-                           <div 
-                              key={i} 
-                              className="w-2 bg-primary rounded-full transition-all duration-75 ease-out shadow-lg shadow-primary/20"
-                              style={{ 
-                                  height: `${Math.max(15, Math.random() * volume * 1.5)}%`,
-                                  opacity: 0.5 + (volume / 255)
-                              }}
-                           ></div>
-                        ))}
-                     </div>
-                  )}
+                  <div className="h-8 w-px bg-white/20 mx-1"></div>
+                  <button 
+                    onClick={() => setMode(mode === 'chat' ? 'voice' : 'chat')}
+                    className={`size-8 rounded-full flex items-center justify-center transition-all ${mode === 'voice' ? 'bg-white text-primary' : 'bg-white/20 hover:bg-white/30'}`}
+                    title={mode === 'chat' ? "Switch to Voice" : "Switch to Chat"}
+                  >
+                     <span className="material-symbols-outlined text-sm">{mode === 'chat' ? 'mic' : 'chat'}</span>
+                  </button>
+                  <button onClick={() => setIsOpen(false)} className="size-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
+                    <span className="material-symbols-outlined text-sm">close</span>
+                  </button>
                </div>
-             )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-hidden relative bg-gray-50 dark:bg-black/20">
+               {mode === 'chat' ? (
+                 <div className="absolute inset-0 flex flex-col">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                       {messages.map((msg, i) => (
+                         <div key={i} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                            <div className={`flex gap-2 max-w-[90%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                                {/* Avatar */}
+                                <div className={`size-8 rounded-full flex items-center justify-center flex-shrink-0 mt-auto shadow-sm ${
+                                    msg.role === 'user' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-700 text-primary'
+                                }`}>
+                                    <span className="material-symbols-outlined text-sm">
+                                        {msg.role === 'user' ? 'person' : 'smart_toy'}
+                                    </span>
+                                </div>
+
+                                <div className={`p-4 rounded-2xl text-sm font-medium leading-relaxed shadow-sm whitespace-pre-wrap ${
+                                  msg.role === 'user' 
+                                  ? 'bg-primary text-white rounded-tr-sm' 
+                                  : 'bg-white dark:bg-gray-800 text-text-main-light dark:text-text-main-dark border border-gray-100 dark:border-white/5 rounded-tl-sm'
+                                }`}>
+                                  {msg.text}
+                                </div>
+                            </div>
+                            <span className="text-[9px] text-text-sec-light dark:text-text-sec-dark mt-1 px-12 opacity-50">
+                               {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                         </div>
+                       ))}
+                       
+                       {isChatLoading && (
+                         <div className="flex justify-start pl-10">
+                           <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 dark:border-white/5 flex gap-1.5 items-center">
+                              <span className="size-1.5 bg-primary/40 rounded-full animate-bounce"></span>
+                              <span className="size-1.5 bg-primary/40 rounded-full animate-bounce delay-100"></span>
+                              <span className="size-1.5 bg-primary/40 rounded-full animate-bounce delay-200"></span>
+                              <span className="text-[10px] text-text-sec-light dark:text-text-sec-dark ml-1">Thinking...</span>
+                           </div>
+                         </div>
+                       )}
+                       
+                       {/* Suggestions Grid - Show only when chat is "empty" (just welcome message) */}
+                       {messages.length === 1 && (
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                               {SUGGESTIONS.map((suggestion, idx) => (
+                                   <button 
+                                       key={idx}
+                                       onClick={() => handleSendMessage(suggestion.text)}
+                                       className="p-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-white/10 transition-all text-left flex items-center gap-3 group active:scale-[0.98]"
+                                   >
+                                       <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                                           <span className="material-symbols-outlined text-lg">{suggestion.icon}</span>
+                                       </div>
+                                       <span className="text-xs font-bold text-text-main-light dark:text-text-main-dark">{suggestion.text}</span>
+                                   </button>
+                               ))}
+                           </div>
+                       )}
+
+                       <div ref={messagesEndRef} />
+                    </div>
+                    
+                    <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="p-4 bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-white/5 shrink-0">
+                       <div className="flex gap-2 relative">
+                          <input 
+                            type="text" 
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Type your question..."
+                            className="flex-1 h-12 bg-gray-100 dark:bg-white/5 rounded-2xl pl-4 pr-12 text-sm focus:ring-2 focus:ring-primary outline-none transition-all dark:text-white"
+                          />
+                          <button 
+                              type="submit" 
+                              disabled={!input.trim() || isChatLoading}
+                              className="absolute right-1 top-1 bottom-1 size-10 bg-white dark:bg-white/10 text-primary rounded-xl flex items-center justify-center shadow-sm hover:bg-primary hover:text-white transition-all disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-primary"
+                          >
+                             <span className="material-symbols-outlined">send</span>
+                          </button>
+                       </div>
+                    </form>
+                 </div>
+               ) : (
+                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-gray-50 to-white dark:from-black/20 dark:to-surface-dark">
+                    <div className={`relative size-32 rounded-full flex items-center justify-center mb-8 transition-all duration-500 ${
+                        isVoiceActive 
+                        ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] scale-110' 
+                        : 'bg-primary shadow-xl shadow-primary/30'
+                    }`}>
+                       <span className="material-symbols-outlined text-6xl text-white z-10">
+                          {isVoiceActive ? 'graphic_eq' : 'mic'}
+                       </span>
+                       
+                       {/* Dynamic Waves */}
+                       {isVoiceActive && (
+                          <>
+                             <div className="absolute inset-0 rounded-full border-2 border-white/50 animate-[ping_1.5s_ease-in-out_infinite]"></div>
+                             <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-[ping_2s_ease-in-out_infinite] delay-300"></div>
+                          </>
+                       )}
+                    </div>
+                    
+                    <h3 className="text-2xl font-black font-display mb-2 text-text-main-light dark:text-text-main-dark">
+                      {isVoiceActive 
+                        ? (voiceStatus === 'listening' ? "I'm Listening..." : "Speaking...") 
+                        : "Tap to Speak"}
+                    </h3>
+                    <p className="text-sm text-text-sec-light dark:text-text-sec-dark max-w-xs mx-auto mb-10 leading-relaxed font-medium">
+                       {isVoiceActive 
+                        ? "Ask me to navigate to home, trips, or guides. I'm listening." 
+                        : "Experience hands-free navigation. Just tap the button to start."}
+                    </p>
+
+                    <button 
+                      onClick={toggleVoiceSession}
+                      className={`px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs shadow-xl transition-all transform hover:scale-105 active:scale-95 ${
+                         isVoiceActive 
+                         ? 'bg-white dark:bg-white/10 text-red-500 border border-red-500/20 hover:bg-red-50' 
+                         : 'bg-primary text-white hover:bg-primary/90'
+                      }`}
+                    >
+                       {isVoiceActive ? 'End Session' : 'Start Conversation'}
+                    </button>
+
+                    {/* Visualizer Bar */}
+                    {isVoiceActive && (
+                       <div className="flex items-end justify-center gap-1.5 h-16 mt-12 w-full max-w-[240px]">
+                          {[...Array(8)].map((_, i) => (
+                             <div 
+                                key={i} 
+                                className="w-2 bg-primary rounded-full transition-all duration-75 ease-out shadow-lg shadow-primary/20"
+                                style={{ 
+                                    height: `${Math.max(15, Math.random() * volume * 1.5)}%`,
+                                    opacity: 0.5 + (volume / 255)
+                                }}
+                             ></div>
+                          ))}
+                       </div>
+                    )}
+                 </div>
+               )}
+            </div>
           </div>
         </div>
       )}
