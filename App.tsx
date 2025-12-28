@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -141,11 +142,10 @@ const App: React.FC = () => {
           <div className="w-full flex flex-col items-center">
             <Hero onBook={handleBookTrip} />
             {/* 
-                Increased margin top for better spacing between Hero widget and content.
-                Mobile: Widget ~370px height, translated 75%. Protrudes ~280px. mt-[400px] gives ~120px gap.
-                Desktop: Widget ~250px height, translated 75%. Protrudes ~190px. mt-[320px] gives ~130px gap.
+                Adjusted margin top for better spacing between Hero widget and content.
+                The widget has been moved up (translate-y-30%), so we reduce the margin top here.
             */}
-            <div className="w-full flex flex-col items-center gap-6 md:gap-8 mt-[400px] md:mt-[320px]">
+            <div className="w-full flex flex-col items-center gap-6 md:gap-8 mt-[250px] md:mt-[200px]">
               <MoodSection />
               <TrendingSection />
               <TripPlanner onBook={handleBookTrip} />

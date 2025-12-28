@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { HERO_SLIDES } from '../constants';
 import { BookingWidget } from './BookingWidget';
@@ -104,7 +105,7 @@ export const Hero: React.FC<HeroProps> = ({ onBook }) => {
           </div>
         ))}
 
-        {/* Main Content Layer - Moved Up */}
+        {/* Main Content Layer */}
         <div className="relative z-30 h-full max-w-[1440px] mx-auto px-6 flex flex-col justify-start pt-[12vh] md:pt-[18vh]">
           
           {HERO_SLIDES.map((slide, index) => (
@@ -182,72 +183,28 @@ export const Hero: React.FC<HeroProps> = ({ onBook }) => {
             </div>
           ))}
         </div>
-
-        {/* Right Side - Interactive Navigation Deck */}
-        <div className="absolute bottom-56 md:bottom-24 right-6 md:right-20 z-40 flex flex-col gap-3 items-end">
-           {/* Next Slide Preview Card */}
-           <div 
-             className="hidden md:block w-56 h-28 bg-black/20 backdrop-blur-xl rounded-2xl p-3 border border-white/10 shadow-2xl hover:scale-105 transition-all cursor-pointer group relative overflow-hidden"
-             onClick={nextSlide}
-           >
-              <div className="absolute inset-0 w-full h-full">
-                 <img 
-                   src={HERO_SLIDES[getNextSlideIndex(1)].image} 
-                   alt="Next" 
-                   className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
-                 />
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent"></div>
-              </div>
-              <div className="absolute bottom-3 left-3 right-3">
-                 <p className="text-[9px] font-bold uppercase text-accent tracking-widest mb-1">Up Next</p>
-                 <p className="text-white font-bold text-base leading-tight truncate">{HERO_SLIDES[getNextSlideIndex(1)].title}</p>
-                 <div className="flex justify-between items-center mt-2">
-                    <div className="h-0.5 w-full bg-white/20 rounded-full overflow-hidden">
-                       <div 
-                         className="h-full bg-accent transition-all duration-[16ms]" 
-                         style={{ width: `${progress}%` }}
-                       ></div>
-                    </div>
-                 </div>
-              </div>
-           </div>
-
-           {/* Slide Indicators */}
-           <div className="flex gap-2">
-              <button 
-                onClick={prevSlide}
-                className="size-10 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all active:scale-95"
-              >
-                 <span className="material-symbols-outlined text-lg">arrow_back</span>
-              </button>
-              
-              <div className="h-10 bg-black/20 border border-white/10 rounded-full px-3 flex items-center gap-2 backdrop-blur-md hidden md:flex">
-                 {HERO_SLIDES.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => goToSlide(i)}
-                      className={`h-1 rounded-full transition-all duration-300 ${
-                        i === currentSlide 
-                          ? 'w-6 bg-primary shadow-[0_0_10px_rgba(99,102,241,0.5)]' 
-                          : 'w-1 bg-white/20 hover:bg-white/50'
-                      }`}
-                    />
-                 ))}
-              </div>
-
-              <button 
-                onClick={nextSlide}
-                className="size-10 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all active:scale-95"
-              >
-                 <span className="material-symbols-outlined text-lg">arrow_forward</span>
-              </button>
-           </div>
-        </div>
         
       </div>
 
+      {/* Alternative Navigation - Side Arrows */}
+      <button 
+        onClick={prevSlide}
+        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-40 size-12 md:size-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all active:scale-95 group shadow-2xl"
+        aria-label="Previous Slide"
+      >
+         <span className="material-symbols-outlined text-3xl group-hover:-translate-x-1 transition-transform">chevron_left</span>
+      </button>
+
+      <button 
+        onClick={nextSlide}
+        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-40 size-12 md:size-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all active:scale-95 group shadow-2xl"
+        aria-label="Next Slide"
+      >
+         <span className="material-symbols-outlined text-3xl group-hover:translate-x-1 transition-transform">chevron_right</span>
+      </button>
+
       {/* Bottom Booking Widget Container - Absolute Positioned */}
-      <div className="absolute bottom-0 left-0 right-0 z-[60] px-4 translate-y-[75%]">
+      <div className="absolute bottom-0 left-0 right-0 z-[60] px-4 translate-y-[30%]">
          {/* Reduced max-width for a more compact card */}
          <div className="max-w-[950px] mx-auto">
            <div className="relative group/booking perspective-[1000px]">
