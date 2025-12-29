@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { TRENDING_DESTINATIONS } from '../constants';
 import { GoogleGenAI, Type } from "@google/genai";
@@ -17,6 +18,26 @@ export const TrendingSection: React.FC = () => {
   const [activeDestId, setActiveDestId] = useState<string | null>(null);
   const [isThinking, setIsThinking] = useState(false);
   const [pulseData, setPulseData] = useState<PulseData | null>(null);
+  const [thoughtStep, setThoughtStep] = useState(0);
+
+  const thoughts = [
+    "Analyzing seasonal weather patterns...",
+    "Checking real-time crowd density...",
+    "Scanning local forums for hidden gems...",
+    "Calculating uniqueness score...",
+    "Synthesizing final vibe check..."
+  ];
+
+  useEffect(() => {
+    let interval: any;
+    if (isThinking) {
+      setThoughtStep(0);
+      interval = setInterval(() => {
+        setThoughtStep((prev) => (prev + 1) % thoughts.length);
+      }, 1500);
+    }
+    return () => clearInterval(interval);
+  }, [isThinking]);
 
   const states = useMemo(() => {
     const s = new Set<string>();
@@ -259,23 +280,45 @@ export const TrendingSection: React.FC = () => {
               <span className="material-symbols-outlined text-lg">close</span>
             </button>
 
-            <div className="p-8 text-center">
+            <div className="p-8 text-center min-h-[400px] flex flex-col justify-center">
               {isThinking ? (
-                <div className="py-10 flex flex-col items-center">
-                  <div className="relative size-20 mb-6">
-                    <div className="absolute inset-0 border-4 border-primary/20 rounded-full animate-ping"></div>
-                    <div className="absolute inset-0 border-4 border-t-primary rounded-full animate-spin"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                       <span className="material-symbols-outlined text-3xl text-primary animate-pulse">psychology</span>
-                    </div>
+                <div className="flex flex-col items-center justify-center py-8">
+                  <div className="relative size-24 mb-8">
+                      {/* Outer Ring */}
+                      <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-[spin_3s_linear_infinite]"></div>
+                      {/* Inner Ring */}
+                      <div className="absolute inset-2 rounded-full border-2 border-t-primary border-r-primary border-b-transparent border-l-transparent animate-[spin_1.5s_linear_infinite]"></div>
+                      {/* Pulse */}
+                      <div className="absolute inset-6 bg-primary/10 rounded-full animate-pulse"></div>
+                      {/* Icon */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                         <span className="material-symbols-outlined text-3xl text-primary animate-pulse">psychology_alt</span>
+                      </div>
                   </div>
-                  <h3 className="text-xl font-bold font-display animate-pulse">Thinking Deeply...</h3>
-                  <p className="text-xs text-text-sec-light dark:text-text-sec-dark mt-2">
-                    Gemini 3 Pro is analyzing weather patterns, crowd levels, and hidden gems for {TRENDING_DESTINATIONS.find(d => d.id === activeDestId)?.name}.
-                  </p>
+                  
+                  <h3 className="text-2xl font-black font-display bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent animate-pulse mb-4">
+                      Gemini is Thinking
+                  </h3>
+                  
+                  <div className="h-6 relative w-full overflow-hidden">
+                     {thoughts.map((thought, index) => (
+                        <p 
+                           key={index}
+                           className={`absolute inset-0 w-full text-xs font-bold uppercase tracking-widest text-text-sec-light dark:text-text-sec-dark transition-all duration-500 transform ${
+                              index === thoughtStep 
+                              ? 'opacity-100 translate-y-0' 
+                              : index < thoughtStep 
+                                ? 'opacity-0 -translate-y-full' 
+                                : 'opacity-0 translate-y-full'
+                           }`}
+                        >
+                           {thought}
+                        </p>
+                     ))}
+                  </div>
                 </div>
               ) : pulseData && (
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-6 animate-in fade-in duration-500">
                    <div className="flex flex-col items-center">
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[9px] font-extrabold uppercase tracking-widest border border-primary/20 mb-4">
                         <span className="material-symbols-outlined text-xs filled">auto_awesome</span>

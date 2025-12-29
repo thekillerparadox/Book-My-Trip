@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { GoogleGenAI } from "@google/genai";
 
@@ -146,7 +147,7 @@ export const AIVisualizer: React.FC = () => {
              <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                 <span className="material-symbols-outlined text-2xl filled">auto_awesome</span>
              </div>
-             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight font-display">AI Visual Studio</h2>
+             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight font-display">AI Visuals</h2>
           </div>
           <p className="text-text-sec-light dark:text-text-sec-dark max-w-xl text-sm md:text-base opacity-80 leading-relaxed font-medium">
             Create dream destinations from scratch or reimagine your existing photos with our advanced generation engine.

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Guide, Trip } from '../types';
 import { GoogleGenAI, Type } from "@google/genai";
 
@@ -96,6 +97,26 @@ export const TourGuideSection: React.FC<TourGuideSectionProps> = ({ onBook }) =>
     reason: string;
     suggestedItinerary: string;
   } | null>(null);
+  const [thoughtStep, setThoughtStep] = useState(0);
+
+  const thoughts = [
+    "Analyzing user intent...",
+    "Evaluating guide specialties...",
+    "Matching cultural expertise...",
+    "Drafting personalized itinerary...",
+    "Finalizing best match..."
+  ];
+
+  useEffect(() => {
+    let interval: any;
+    if (aiMatchLoading) {
+      setThoughtStep(0);
+      interval = setInterval(() => {
+        setThoughtStep((prev) => (prev + 1) % thoughts.length);
+      }, 1500);
+    }
+    return () => clearInterval(interval);
+  }, [aiMatchLoading]);
 
   const filteredGuides = MOCK_GUIDES.filter(g => 
     g.location.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -196,7 +217,7 @@ export const TourGuideSection: React.FC<TourGuideSectionProps> = ({ onBook }) =>
 
         {/* Search & AI Match Bar */}
         <div className="relative max-w-2xl mx-auto mb-16">
-           <div className="bg-white dark:bg-surface-dark p-2 rounded-[1.5rem] shadow-2xl border border-gray-100 dark:border-white/5 flex flex-col md:flex-row gap-2">
+           <div className="bg-white dark:bg-surface-dark p-2 rounded-[1.5rem] shadow-2xl border border-gray-100 dark:border-white/5 flex flex-col md:flex-row gap-2 relative z-20">
               <div className="flex-1 relative">
                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-sec-light">search</span>
                  <input 
@@ -210,12 +231,12 @@ export const TourGuideSection: React.FC<TourGuideSectionProps> = ({ onBook }) =>
               <button 
                  onClick={handleAiMatch}
                  disabled={aiMatchLoading}
-                 className="h-14 px-8 bg-primary text-white rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                 className="h-14 px-8 bg-primary text-white rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed min-w-[140px]"
               >
                  {aiMatchLoading ? (
                    <>
                      <span className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                     <span>Matching...</span>
+                     <span>Thinking...</span>
                    </>
                  ) : (
                    <>
@@ -226,9 +247,40 @@ export const TourGuideSection: React.FC<TourGuideSectionProps> = ({ onBook }) =>
               </button>
            </div>
            
+           {/* Thinking Indicator Overlay */}
+           {aiMatchLoading && (
+              <div className="absolute top-full left-0 right-0 mt-4 bg-white dark:bg-[#0F172A] rounded-2xl p-8 shadow-2xl border-2 border-primary/20 animate-in fade-in slide-in-from-top-4 z-10 flex flex-col items-center justify-center text-center">
+                 <div className="flex items-center gap-3 mb-4">
+                    <span className="size-2 bg-primary rounded-full animate-bounce"></span>
+                    <span className="size-2 bg-primary rounded-full animate-bounce delay-100"></span>
+                    <span className="size-2 bg-primary rounded-full animate-bounce delay-200"></span>
+                 </div>
+                 <h4 className="font-bold text-lg mb-1 animate-pulse">Gemini is finding the perfect match</h4>
+                 <div className="h-6 relative w-full overflow-hidden">
+                     {thoughts.map((thought, index) => (
+                        <p 
+                           key={index}
+                           className={`absolute inset-0 w-full text-xs font-medium text-text-sec-light dark:text-text-sec-dark transition-all duration-500 transform ${
+                              index === thoughtStep 
+                              ? 'opacity-100 translate-y-0' 
+                              : index < thoughtStep 
+                                ? 'opacity-0 -translate-y-full' 
+                                : 'opacity-0 translate-y-full'
+                           }`}
+                        >
+                           {thought}
+                        </p>
+                     ))}
+                 </div>
+              </div>
+           )}
+
            {/* AI Recommendation Result */}
            {aiRecommendation && (
               <div className="absolute top-full left-0 right-0 mt-4 bg-white dark:bg-[#0F172A] rounded-2xl p-6 shadow-2xl border-2 border-primary/20 animate-in fade-in slide-in-from-top-4 z-20">
+                 <button onClick={() => setAiRecommendation(null)} className="absolute top-4 right-4 text-text-sec-light hover:text-primary">
+                    <span className="material-symbols-outlined text-sm">close</span>
+                 </button>
                  <div className="flex items-start gap-4">
                     <div className="size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
                        <span className="material-symbols-outlined text-2xl">auto_awesome</span>
@@ -312,30 +364,4 @@ export const TourGuideSection: React.FC<TourGuideSectionProps> = ({ onBook }) =>
 
                     <div className="mt-auto pt-6 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
                        <div>
-                          <p className="text-[9px] font-bold uppercase tracking-widest text-text-sec-light opacity-60">Daily Rate</p>
-                          <p className="text-lg font-black text-primary">{guide.pricePerDay}</p>
-                       </div>
-                       <button 
-                          onClick={() => handleBookGuide(guide)}
-                          className="px-6 py-3 bg-text-main-light dark:bg-white text-white dark:text-black rounded-xl font-bold text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform shadow-lg"
-                       >
-                          Book Now
-                       </button>
-                    </div>
-                 </div>
-              </div>
-           ))}
-        </div>
-
-        {filteredGuides.length === 0 && (
-           <div className="text-center py-20 opacity-40">
-              <span className="material-symbols-outlined text-6xl mb-4">person_search</span>
-              <h3 className="text-2xl font-bold">No guides found</h3>
-              <p>Try searching for a different location or interest.</p>
-           </div>
-        )}
-
-      </div>
-    </section>
-  );
-};
+                          <p className="

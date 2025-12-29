@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { INTERNATIONAL_DESTINATIONS } from '../constants';
 import { FeaturedDestination, Trip } from '../types';
@@ -15,6 +16,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [selectedDest, setSelectedDest] = useState<FeaturedDestination | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiThinking, setAiThinking] = useState(false); // Distinction for thinking mode
   const [aiResponse, setAiResponse] = useState<{ text: string; sources?: any[] } | null>(null);
   const [editPrompt, setEditPrompt] = useState('');
   const [editedImage, setEditedImage] = useState<string | null>(null);
@@ -126,6 +128,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
   const handleAISearch = async () => {
     if (!selectedDest) return;
     setAiLoading(true);
+    setAiThinking(false);
     setAiResponse(null);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -152,6 +155,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
   const handleAIMaps = async () => {
     if (!selectedDest) return;
     setAiLoading(true);
+    setAiThinking(false);
     setAiResponse(null);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -195,6 +199,7 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
   const handleAITinerary = async () => {
     if (!selectedDest) return;
     setAiLoading(true);
+    setAiThinking(true); // Enable thinking visuals
     setAiResponse(null);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -212,12 +217,14 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
       setAiResponse({ text: "Complex AI assistant failed." });
     } finally {
       setAiLoading(false);
+      setAiThinking(false);
     }
   };
 
   const handleEditImage = async () => {
     if (!selectedDest || !editPrompt) return;
     setAiLoading(true);
+    setAiThinking(false);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const imgRes = await fetch(selectedDest.image);
@@ -443,9 +450,29 @@ export const InternationalGateway: React.FC<InternationalGatewayProps> = ({ onBo
                <div className="flex-1 min-h-0">
                   {aiLoading ? (
                     <div className="h-full flex flex-col items-center justify-center text-center py-20">
-                      <div className="size-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-6"></div>
-                      <h4 className="text-xl font-bold tracking-tight mb-2 font-display">Generating Insights</h4>
-                      <p className="text-sm opacity-40 font-medium">Please wait while our AI synthesizes real-time travel data.</p>
+                      {aiThinking ? (
+                        <>
+                          <div className="relative size-20 mb-6">
+                            <div className="absolute inset-0 border-4 border-primary/20 rounded-full animate-[ping_2s_infinite]"></div>
+                            <div className="absolute inset-2 border-2 border-primary rounded-full animate-spin"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="material-symbols-outlined text-3xl text-primary animate-pulse">psychology</span>
+                            </div>
+                          </div>
+                          <h4 className="text-xl font-black tracking-tight mb-2 font-display bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent animate-pulse">
+                              Thinking Deeply...
+                          </h4>
+                          <p className="text-sm opacity-40 font-medium max-w-xs">
+                              Gemini 3 Pro is creating a complex 7-day plan just for you.
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <div className="size-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-6"></div>
+                          <h4 className="text-xl font-bold tracking-tight mb-2 font-display">Generating Insights</h4>
+                          <p className="text-sm opacity-40 font-medium">Please wait while our AI synthesizes real-time travel data.</p>
+                        </>
+                      )}
                     </div>
                   ) : aiResponse ? (
                     <div className="bg-gray-50 dark:bg-white/5 p-6 lg:p-8 rounded-3xl border border-gray-100 dark:border-white/5 animate-in slide-in-from-bottom-6 duration-700">

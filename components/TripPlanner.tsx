@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Trip } from '../types';
 import { TRENDING_DESTINATIONS, INTERNATIONAL_DESTINATIONS } from '../constants';
@@ -28,6 +29,26 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
   const [isThinking, setIsThinking] = useState(false);
   const [result, setResult] = useState<PlannerResult | null>(null);
   const [isPlayingTTS, setIsPlayingTTS] = useState(false);
+  const [thoughtStep, setThoughtStep] = useState(0);
+
+  const thoughts = [
+    "Analyzing group psychology and needs...",
+    "Scanning weather patterns for requested dates...",
+    "Filtering for budget-appropriate luxury...",
+    "Finding unique local experiences...",
+    "Generating optimal itinerary..."
+  ];
+
+  useEffect(() => {
+    let interval: any;
+    if (isThinking) {
+      setThoughtStep(0);
+      interval = setInterval(() => {
+        setThoughtStep((prev) => (prev + 1) % thoughts.length);
+      }, 1500);
+    }
+    return () => clearInterval(interval);
+  }, [isThinking]);
 
   const groupOptions = [
     { id: 'Couple', icon: 'favorite', label: 'Couple' },
@@ -373,19 +394,55 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
                    </div>
                 </div>
              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center relative z-10 opacity-40 p-10 min-h-[400px]">
+                <div className="h-full flex flex-col items-center justify-center text-center relative z-10 p-10 min-h-[400px]">
                    {isThinking ? (
-                      <div className="animate-pulse flex flex-col items-center">
-                         <span className="material-symbols-outlined text-6xl mb-4 text-primary">cloud_sync</span>
-                         <h4 className="text-lg font-bold font-display">Thinking Deeply...</h4>
-                         <p className="text-xs max-w-xs mt-2">Analyzing weather patterns, local events, and {groupType.toLowerCase()} dynamics for {scope} destinations.</p>
+                      <div className="flex flex-col items-center">
+                         <div className="relative size-32 mb-8">
+                             {/* Neural Network Pulse */}
+                             <div className="absolute inset-0 rounded-full border border-primary/20 scale-150 animate-[ping_2s_ease-out_infinite]"></div>
+                             <div className="absolute inset-0 rounded-full border border-primary/30 scale-125 animate-[ping_2s_ease-out_infinite] delay-300"></div>
+                             
+                             {/* Center Brain */}
+                             <div className="absolute inset-0 flex items-center justify-center bg-white dark:bg-surface-dark rounded-full shadow-2xl z-10">
+                                <span className="material-symbols-outlined text-5xl text-primary animate-pulse">psychology</span>
+                             </div>
+                             
+                             {/* Orbiting dots */}
+                             <div className="absolute inset-0 animate-spin duration-[3s]">
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 size-3 bg-accent rounded-full shadow-lg"></div>
+                             </div>
+                             <div className="absolute inset-0 animate-spin duration-[5s] direction-reverse">
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-2 size-2 bg-primary rounded-full shadow-lg"></div>
+                             </div>
+                         </div>
+                         
+                         <h3 className="text-2xl font-black font-display bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent animate-pulse mb-4">
+                            Thinking Deeply...
+                         </h3>
+                         
+                         <div className="h-6 relative w-full max-w-xs overflow-hidden">
+                             {thoughts.map((thought, index) => (
+                                <p 
+                                   key={index}
+                                   className={`absolute inset-0 w-full text-xs font-bold uppercase tracking-widest text-text-sec-light dark:text-text-sec-dark transition-all duration-500 transform ${
+                                      index === thoughtStep 
+                                      ? 'opacity-100 translate-y-0' 
+                                      : index < thoughtStep 
+                                        ? 'opacity-0 -translate-y-full' 
+                                        : 'opacity-0 translate-y-full'
+                                   }`}
+                                >
+                                   {thought}
+                                </p>
+                             ))}
+                         </div>
                       </div>
                    ) : (
-                      <>
+                      <div className="opacity-40">
                          <span className="material-symbols-outlined text-6xl mb-4">map</span>
                          <h4 className="text-lg font-bold font-display">Your Adventure Awaits</h4>
-                         <p className="text-xs max-w-xs mt-2">Configure your preferences on the left to generate a bespoke itinerary.</p>
-                      </>
+                         <p className="text-xs max-w-xs mt-2 mx-auto">Configure your preferences on the left to generate a bespoke itinerary.</p>
+                      </div>
                    )}
                 </div>
              )}

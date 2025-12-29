@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const PARTNERS = [
@@ -78,7 +77,7 @@ export const PartnersSection: React.FC = () => {
   );
 };
 
-const PartnerCard = ({ partner }: { partner: { name: string, icon: string, type: string } }) => (
+const PartnerCard: React.FC<{ partner: { name: string, icon: string, type: string } }> = ({ partner }) => (
     <div className="w-[200px] h-[110px] flex-shrink-0 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl flex flex-col items-center justify-center gap-3 shadow-sm hover:shadow-xl hover:bg-white dark:hover:bg-white/10 hover:border-primary/20 hover:-translate-y-1 transition-all duration-300 group cursor-default select-none">
         <div className="size-10 rounded-full bg-white dark:bg-white/5 shadow-inner flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors text-text-sec-light dark:text-text-sec-dark">
             <span className="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">{partner.icon}</span>
