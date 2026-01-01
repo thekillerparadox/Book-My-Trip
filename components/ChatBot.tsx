@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, Chat } from "@google/genai";
 
@@ -12,7 +13,16 @@ export const ChatBot: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatSession, setChatSession] = useState<Chat | null>(null);
+  const [thinkingStep, setThinkingStep] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const thoughts = [
+    "Analyzing your request...",
+    "Reviewing travel data...",
+    "Checking availability...",
+    "Curating recommendations...",
+    "Formulating response..."
+  ];
 
   // Initialize chat session on open
   useEffect(() => {
@@ -34,6 +44,17 @@ export const ChatBot: React.FC = () => {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    let interval: any;
+    if (isLoading) {
+      setThinkingStep(0);
+      interval = setInterval(() => {
+        setThinkingStep(prev => (prev + 1) % thoughts.length);
+      }, 1500);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -52,33 +73,31 @@ export const ChatBot: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Add placeholder for AI response
-      setMessages(prev => [...prev, { role: 'model', text: '' }]);
-      
       const result = await chatSession.sendMessageStream({ message: userText });
       
       let fullResponse = '';
+      let isFirstChunk = true;
+      
       for await (const chunk of result) {
         const text = chunk.text;
         if (text) {
           fullResponse += text;
-          setMessages(prev => {
-            const newMsgs = [...prev];
-            newMsgs[newMsgs.length - 1] = { role: 'model', text: fullResponse };
-            return newMsgs;
-          });
+          
+          if (isFirstChunk) {
+            setMessages(prev => [...prev, { role: 'model', text: fullResponse }]);
+            isFirstChunk = false;
+          } else {
+            setMessages(prev => {
+              const newMsgs = [...prev];
+              newMsgs[newMsgs.length - 1] = { role: 'model', text: fullResponse };
+              return newMsgs;
+            });
+          }
         }
       }
     } catch (error) {
       console.error("Chat Error:", error);
-      setMessages(prev => {
-        const newMsgs = [...prev];
-         // Remove the empty placeholder if it exists and failed
-        if (newMsgs[newMsgs.length - 1].text === '') {
-            newMsgs.pop();
-        }
-        return [...newMsgs, { role: 'model', text: "I'm having a bit of trouble connecting to the travel network right now. Please try again in a moment." }];
-      });
+      setMessages(prev => [...prev, { role: 'model', text: "I'm having a bit of trouble connecting to the travel network right now. Please try again in a moment." }]);
     } finally {
       setIsLoading(false);
     }
@@ -132,15 +151,22 @@ export const ChatBot: React.FC = () => {
                 </div>
              </div>
            ))}
+           
+           {/* Thinking Indicator - Shown while waiting for first chunk */}
            {isLoading && messages[messages.length - 1]?.role === 'user' && (
-              <div className="flex justify-start">
+              <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="size-6 rounded-full bg-primary/10 flex-shrink-0 mr-2 flex items-center justify-center mt-1">
-                      <span className="material-symbols-outlined text-xs text-primary">smart_toy</span>
+                      <span className="material-symbols-outlined text-xs text-primary">psychology</span>
                   </div>
-                  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 dark:border-white/5 flex gap-1">
-                     <span className="size-1.5 bg-primary/40 rounded-full animate-bounce"></span>
-                     <span className="size-1.5 bg-primary/40 rounded-full animate-bounce delay-100"></span>
-                     <span className="size-1.5 bg-primary/40 rounded-full animate-bounce delay-200"></span>
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 dark:border-white/5 flex flex-col gap-2 min-w-[180px]">
+                     <div className="flex items-center gap-2">
+                        <span className="size-1.5 bg-primary rounded-full animate-bounce"></span>
+                        <span className="size-1.5 bg-primary rounded-full animate-bounce delay-100"></span>
+                        <span className="size-1.5 bg-primary rounded-full animate-bounce delay-200"></span>
+                     </div>
+                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary opacity-80 animate-pulse transition-all duration-300">
+                        {thoughts[thinkingStep]}
+                     </p>
                   </div>
               </div>
            )}

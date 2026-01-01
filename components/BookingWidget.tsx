@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { BOOKING_TABS } from '../constants';
 import { BookingType, Trip } from '../types';
@@ -18,7 +19,6 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({ onBook }) => {
   
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
-  const [infants, setInfants] = useState(0);
   const [showTravelerPicker, setShowTravelerPicker] = useState(false);
   
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -34,11 +34,7 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({ onBook }) => {
   }, []);
 
   const getTravelerText = () => {
-    const parts = [];
-    parts.push(`${adults} Adult${adults > 1 ? 's' : ''}`);
-    if (children > 0) parts.push(`${children} Child${children > 1 ? 'ren' : ''}`);
-    if (infants > 0) parts.push(`${infants} Infant${infants > 1 ? 's' : ''}`);
-    return parts.join(', ');
+    return `${adults} Adult${adults > 1 ? 's' : ''}, ${children} Child${children !== 1 ? 'ren' : ''}`;
   };
 
   const handleSearch = () => {
@@ -46,16 +42,16 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({ onBook }) => {
       const newTrip: Trip = {
         id: Math.random().toString(36).substr(2, 9),
         destinationName: to,
-        tripTitle: tripTitle || `${to} Getaway`, 
+        tripTitle: tripTitle || `${to} Adventure`, 
         image: 'https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?q=80&w=1200&auto=format&fit=crop',
-        dates: departDate || 'Upcoming',
+        dates: departDate || 'Flexible Dates',
         travelers: getTravelerText(),
         price: '₹24,999',
         type: activeTab,
         bookedAt: Date.now()
       };
       onBook(newTrip);
-      alert(`Booking confirmed for "${newTrip.tripTitle}"! Check 'My Trips'.`);
+      alert(`Booking initiated for "${newTrip.tripTitle}"! Check 'My Trips'.`);
       setTripTitle('');
       setTo('');
       setFrom('');
@@ -64,99 +60,55 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({ onBook }) => {
     }
   };
 
-  const CounterRow = ({ 
-    label, 
-    subLabel, 
-    count, 
-    onIncrement, 
-    onDecrement, 
-    min = 0, 
-    max = 9 
-  }: { 
-    label: string; 
-    subLabel: string; 
-    count: number; 
-    onIncrement: () => void; 
-    onDecrement: () => void;
-    min?: number;
-    max?: number;
-  }) => (
-    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-white/5 last:border-0">
-      <div className="flex flex-col">
-        <span className="font-bold text-xs text-text-main-light dark:text-text-main-dark">{label}</span>
-        <span className="text-[10px] text-text-sec-light dark:text-text-sec-dark">{subLabel}</span>
-      </div>
-      <div className="flex items-center gap-3">
-        <button 
-          onClick={(e) => { e.stopPropagation(); onDecrement(); }}
-          disabled={count <= min}
-          className={`size-6 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center transition-colors ${count <= min ? 'opacity-30 cursor-not-allowed' : 'hover:bg-primary/10 hover:border-primary text-primary'}`}
-        >
-          <span className="material-symbols-outlined text-sm">remove</span>
-        </button>
-        <span className="font-bold text-xs w-4 text-center">{count}</span>
-        <button 
-          onClick={(e) => { e.stopPropagation(); onIncrement(); }}
-          disabled={count >= max}
-          className={`size-6 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center transition-colors ${count >= max ? 'opacity-30 cursor-not-allowed' : 'hover:bg-primary/10 hover:border-primary text-primary'}`}
-        >
-          <span className="material-symbols-outlined text-sm">add</span>
-        </button>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="w-full max-w-[1100px] px-0">
-      <div className="bg-white dark:bg-surface-dark rounded-3xl shadow-2xl p-5 md:p-6 border border-gray-100 dark:border-white/5">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-gray-100 dark:border-white/5 mb-5 pb-2">
-          <div className="flex gap-6 overflow-x-auto hide-scrollbar w-full md:w-auto">
+    <div className="w-full max-w-[1100px] px-0 mx-auto">
+      <div className="bg-white/80 dark:bg-[#0F172A]/90 backdrop-blur-xl rounded-[2rem] shadow-2xl p-6 border border-white/20 dark:border-white/10">
+        
+        {/* Tab Navigation */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+          <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-2xl w-full sm:w-auto">
             {BOOKING_TABS.map((tab) => (
               <button
                 key={tab.type}
                 onClick={() => setActiveTab(tab.type)}
-                className={`flex items-center gap-1.5 pb-2 border-b-2 transition-all whitespace-nowrap ${
+                className={`flex-1 sm:flex-none px-6 py-2.5 rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider transition-all ${
                   activeTab === tab.type
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-text-sec-light dark:text-text-sec-dark hover:text-primary'
+                    ? 'bg-white dark:bg-surface-dark text-primary shadow-md'
+                    : 'text-text-sec-light dark:text-text-sec-dark hover:text-text-main-light dark:hover:text-white'
                 }`}
               >
                 <span className={`material-symbols-outlined text-lg ${activeTab === tab.type ? 'filled' : ''}`}>{tab.icon}</span>
-                <span className="font-bold text-[11px] uppercase tracking-wider">{tab.type}</span>
+                <span className="hidden sm:inline">{tab.type}</span>
               </button>
             ))}
           </div>
 
           {activeTab === BookingType.FLIGHTS && (
-            <div className="flex bg-gray-50 dark:bg-background-dark p-1 rounded-full mb-2 md:mb-0">
-              <button 
-                onClick={() => setIsRoundTrip(true)}
-                className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${isRoundTrip ? 'bg-white dark:bg-surface-dark shadow-sm text-primary' : 'text-text-sec-light'}`}
-              >
-                Round Trip
-              </button>
-              <button 
-                onClick={() => setIsRoundTrip(false)}
-                className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${!isRoundTrip ? 'bg-white dark:bg-surface-dark shadow-sm text-primary' : 'text-text-sec-light'}`}
-              >
-                One Way
-              </button>
+            <div className="flex gap-4 text-xs font-bold text-text-sec-light dark:text-text-sec-dark">
+               <label className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
+                  <input type="radio" checked={isRoundTrip} onChange={() => setIsRoundTrip(true)} className="text-primary focus:ring-primary" />
+                  Round Trip
+               </label>
+               <label className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
+                  <input type="radio" checked={!isRoundTrip} onChange={() => setIsRoundTrip(false)} className="text-primary focus:ring-primary" />
+                  One Way
+               </label>
             </div>
           )}
         </div>
 
-        {/* Improved Grid: Use 2 columns on mobile instead of 1 to save vertical space */}
-        <div className="grid grid-cols-2 md:grid-cols-12 gap-3 items-end">
-          {/* Trip Name Input */}
-          <div className="col-span-2 md:col-span-12 flex flex-col gap-1 mb-1">
-             <label className="text-[10px] font-bold uppercase tracking-wider text-text-sec-light/60 ml-1">Trip Name <span className="text-primary opacity-60">(Optional)</span></label>
+        {/* Inputs Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+          
+          {/* Trip Name (Optional) */}
+          <div className="md:col-span-12">
              <div className="relative group">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-sec-light/40 group-focus-within:text-primary transition-colors text-lg">edit</span>
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-sec-light group-focus-within:text-primary transition-colors">edit</span>
                 <input
                   value={tripTitle}
                   onChange={(e) => setTripTitle(e.target.value)}
-                  className="w-full h-11 pl-10 pr-4 bg-gray-50 dark:bg-background-dark rounded-xl border border-transparent focus:border-primary/30 focus:ring-0 text-sm font-semibold placeholder:text-text-sec-light/30 outline-none transition-all"
-                  placeholder="e.g., Anniversary Trip..."
+                  className="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 rounded-2xl border-none focus:ring-2 focus:ring-primary/50 text-sm font-semibold placeholder:text-text-sec-light/50 transition-all"
+                  placeholder="Give your trip a name (e.g. Summer Honeymoon)"
                   type="text"
                 />
              </div>
@@ -164,148 +116,132 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({ onBook }) => {
 
           {activeTab === BookingType.FLIGHTS ? (
             <>
-              <div className="col-span-2 md:col-span-3 flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-sec-light/60 ml-1">From</label>
-                <div className="relative group">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-sec-light/40 group-focus-within:text-primary transition-colors text-lg">flight_takeoff</span>
-                  <input
+              {/* From */}
+              <div className="md:col-span-3 relative group">
+                 <label className="text-[9px] font-bold uppercase tracking-widest text-text-sec-light absolute left-4 top-2">From</label>
+                 <input
                     value={from}
                     onChange={(e) => setFrom(e.target.value)}
-                    className="w-full h-11 pl-10 pr-4 bg-gray-50 dark:bg-background-dark rounded-xl border border-transparent focus:border-primary/30 focus:ring-0 text-sm font-semibold placeholder:text-text-sec-light/30 outline-none transition-all"
+                    className="w-full h-[60px] pt-6 pb-2 pl-10 pr-4 bg-gray-50 dark:bg-white/5 rounded-2xl border-none focus:ring-2 focus:ring-primary/50 text-sm font-bold placeholder:text-text-sec-light/50"
                     placeholder="Origin"
                     type="text"
-                  />
-                  <button 
+                 />
+                 <span className="material-symbols-outlined absolute left-3 top-8 -translate-y-1/2 text-text-sec-light group-focus-within:text-primary text-lg">flight_takeoff</span>
+                 
+                 {/* Swap Button (Desktop only) */}
+                 <button 
                     onClick={() => { const temp = from; setFrom(to); setTo(temp); }}
-                    className="absolute -right-2.5 top-1/2 -translate-y-1/2 size-6 bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/10 rounded-full flex items-center justify-center z-10 hover:bg-primary hover:text-white transition-colors shadow-sm hidden md:flex"
-                  >
-                    <span className="material-symbols-outlined text-sm">sync_alt</span>
-                  </button>
-                </div>
+                    className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/10 shadow-md flex items-center justify-center text-primary hover:scale-110 transition-transform hidden md:flex"
+                 >
+                    <span className="material-symbols-outlined text-sm">swap_horiz</span>
+                 </button>
               </div>
 
-              <div className="col-span-2 md:col-span-3 flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-sec-light/60 ml-1">To</label>
-                <div className="relative group">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-sec-light/40 group-focus-within:text-primary text-lg">flight_land</span>
-                  <input
+              {/* To */}
+              <div className="md:col-span-3 relative group">
+                 <label className="text-[9px] font-bold uppercase tracking-widest text-text-sec-light absolute left-4 top-2">To</label>
+                 <input
                     value={to}
                     onChange={(e) => setTo(e.target.value)}
-                    className="w-full h-11 pl-10 pr-4 bg-gray-50 dark:bg-background-dark rounded-xl border border-transparent focus:border-primary/30 focus:ring-0 text-sm font-semibold placeholder:text-text-sec-light/30 outline-none transition-all"
+                    className="w-full h-[60px] pt-6 pb-2 pl-10 pr-4 bg-gray-50 dark:bg-white/5 rounded-2xl border-none focus:ring-2 focus:ring-primary/50 text-sm font-bold placeholder:text-text-sec-light/50"
                     placeholder="Destination"
                     type="text"
-                  />
-                </div>
+                 />
+                 <span className="material-symbols-outlined absolute left-3 top-8 -translate-y-1/2 text-text-sec-light group-focus-within:text-primary text-lg">flight_land</span>
               </div>
 
-              <div className="col-span-1 md:col-span-2 flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-sec-light/60 ml-1">Departure</label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-sec-light/40 text-lg">calendar_today</span>
-                  <input
+              {/* Dates */}
+              <div className="md:col-span-2 relative">
+                 <label className="text-[9px] font-bold uppercase tracking-widest text-text-sec-light absolute left-4 top-2">Depart</label>
+                 <input
                     value={departDate}
                     onChange={(e) => setDepartDate(e.target.value)}
-                    className="w-full h-11 pl-10 pr-4 bg-gray-50 dark:bg-background-dark rounded-xl border border-transparent focus:border-primary/30 focus:ring-0 text-[11px] font-bold outline-none"
+                    className="w-full h-[60px] pt-6 pb-2 pl-4 pr-4 bg-gray-50 dark:bg-white/5 rounded-2xl border-none focus:ring-2 focus:ring-primary/50 text-xs font-bold"
                     type="date"
-                  />
-                </div>
+                 />
               </div>
-
-              <div className={`col-span-1 md:col-span-2 flex flex-col gap-1 transition-opacity ${!isRoundTrip ? 'opacity-30' : 'opacity-100'}`}>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-sec-light/60 ml-1">Return</label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-sec-light/40 text-lg">event_repeat</span>
-                  <input
-                    disabled={!isRoundTrip}
+              <div className={`md:col-span-2 relative ${!isRoundTrip ? 'opacity-50 pointer-events-none' : ''}`}>
+                 <label className="text-[9px] font-bold uppercase tracking-widest text-text-sec-light absolute left-4 top-2">Return</label>
+                 <input
                     value={returnDate}
                     onChange={(e) => setReturnDate(e.target.value)}
-                    className="w-full h-11 pl-10 pr-4 bg-gray-50 dark:bg-background-dark rounded-xl border border-transparent focus:border-primary/30 focus:ring-0 text-[11px] font-bold outline-none"
+                    className="w-full h-[60px] pt-6 pb-2 pl-4 pr-4 bg-gray-50 dark:bg-white/5 rounded-2xl border-none focus:ring-2 focus:ring-primary/50 text-xs font-bold"
                     type="date"
-                  />
-                </div>
+                    disabled={!isRoundTrip}
+                 />
               </div>
             </>
           ) : (
+            // Hotels / Activities Inputs
             <>
-              <div className="col-span-2 md:col-span-6 flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-sec-light/60 ml-1">Location</label>
-                <div className="relative group">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-sec-light/40 group-focus-within:text-primary text-lg">location_on</span>
-                  <input
+               <div className="md:col-span-6 relative group">
+                 <label className="text-[9px] font-bold uppercase tracking-widest text-text-sec-light absolute left-4 top-2">Location</label>
+                 <input
                     value={to}
                     onChange={(e) => setTo(e.target.value)}
-                    className="w-full h-11 pl-10 pr-4 bg-gray-50 dark:bg-background-dark rounded-xl border border-transparent focus:border-primary/30 focus:ring-0 text-sm font-semibold placeholder:text-text-sec-light/30 outline-none transition-all"
-                    placeholder={`Search ${activeTab.toLowerCase()}...`}
+                    className="w-full h-[60px] pt-6 pb-2 pl-10 pr-4 bg-gray-50 dark:bg-white/5 rounded-2xl border-none focus:ring-2 focus:ring-primary/50 text-sm font-bold placeholder:text-text-sec-light/50"
+                    placeholder={`Where to for ${activeTab.toLowerCase()}?`}
                     type="text"
-                  />
-                </div>
-              </div>
-
-              <div className="col-span-2 md:col-span-4 flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-sec-light/60 ml-1">Dates</label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-sec-light/40 text-lg">date_range</span>
-                  <input
-                    className="w-full h-11 pl-10 pr-4 bg-gray-50 dark:bg-background-dark rounded-xl border border-transparent focus:border-primary/30 focus:ring-0 text-sm font-semibold placeholder:text-text-sec-light/30 outline-none"
-                    placeholder="Select dates"
+                 />
+                 <span className="material-symbols-outlined absolute left-3 top-8 -translate-y-1/2 text-text-sec-light group-focus-within:text-primary text-lg">location_on</span>
+               </div>
+               <div className="md:col-span-4 relative group">
+                 <label className="text-[9px] font-bold uppercase tracking-widest text-text-sec-light absolute left-4 top-2">When</label>
+                 <input
                     type="text"
-                  />
-                </div>
-              </div>
+                    placeholder="Add dates"
+                    className="w-full h-[60px] pt-6 pb-2 pl-10 pr-4 bg-gray-50 dark:bg-white/5 rounded-2xl border-none focus:ring-2 focus:ring-primary/50 text-sm font-bold placeholder:text-text-sec-light/50"
+                 />
+                 <span className="material-symbols-outlined absolute left-3 top-8 -translate-y-1/2 text-text-sec-light group-focus-within:text-primary text-lg">calendar_month</span>
+               </div>
             </>
           )}
 
-          <div className="col-span-2 md:col-span-2 flex flex-col gap-1 relative" ref={pickerRef}>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-text-sec-light/60 ml-1">Travelers</label>
-            <div 
-              onClick={() => setShowTravelerPicker(!showTravelerPicker)}
-              className="relative h-11 pl-10 pr-3 bg-gray-50 dark:bg-background-dark rounded-xl border border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center cursor-pointer"
-            >
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-sec-light/40 text-lg">group</span>
-              <span className="text-text-main-light dark:text-text-main-dark font-semibold text-xs truncate">
-                {getTravelerText()}
-              </span>
-            </div>
-
-            {showTravelerPicker && (
-              <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-surface-dark rounded-2xl shadow-2xl border border-gray-100 dark:border-white/5 p-4 z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
-                <h4 className="font-bold text-[11px] uppercase tracking-wider mb-3 opacity-40">Passengers</h4>
-                <CounterRow 
-                  label="Adults" 
-                  subLabel="12+ yrs" 
-                  count={adults} 
-                  min={1}
-                  onIncrement={() => setAdults(a => Math.min(9, a + 1))}
-                  onDecrement={() => setAdults(a => Math.max(1, a - 1))}
-                />
-                <CounterRow 
-                  label="Children" 
-                  subLabel="2–12 yrs" 
-                  count={children} 
-                  onIncrement={() => setChildren(c => Math.min(9, c + 1))}
-                  onDecrement={() => setChildren(c => Math.max(0, c - 1))}
-                />
-                <div className="mt-3">
-                   <button 
-                     onClick={() => setShowTravelerPicker(false)}
-                     className="w-full py-2 bg-primary text-white rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all"
-                   >
-                     Done
-                   </button>
+          {/* Travelers / Search Button Combined for better mobile layout */}
+          <div className="md:col-span-2 relative" ref={pickerRef}>
+             <button 
+               onClick={() => setShowTravelerPicker(!showTravelerPicker)}
+               className="w-full h-[60px] bg-gray-50 dark:bg-white/5 rounded-2xl flex flex-col justify-center px-4 text-left hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+             >
+                <span className="text-[9px] font-bold uppercase tracking-widest text-text-sec-light">Travelers</span>
+                <div className="flex items-center gap-1 overflow-hidden">
+                   <span className="text-xs font-bold truncate">{getTravelerText()}</span>
+                   <span className="material-symbols-outlined text-sm opacity-50">expand_more</span>
                 </div>
-              </div>
-            )}
+             </button>
+
+             {showTravelerPicker && (
+               <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-surface-dark rounded-2xl shadow-2xl border border-gray-100 dark:border-white/5 p-4 z-50 animate-in zoom-in-95 duration-200">
+                  <div className="flex items-center justify-between mb-4">
+                     <span className="text-sm font-bold">Adults</span>
+                     <div className="flex items-center gap-3">
+                        <button onClick={() => setAdults(Math.max(1, adults - 1))} className="size-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-colors"><span className="material-symbols-outlined text-sm">remove</span></button>
+                        <span className="font-bold w-4 text-center">{adults}</span>
+                        <button onClick={() => setAdults(adults + 1)} className="size-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-colors"><span className="material-symbols-outlined text-sm">add</span></button>
+                     </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                     <span className="text-sm font-bold">Children</span>
+                     <div className="flex items-center gap-3">
+                        <button onClick={() => setChildren(Math.max(0, children - 1))} className="size-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-colors"><span className="material-symbols-outlined text-sm">remove</span></button>
+                        <span className="font-bold w-4 text-center">{children}</span>
+                        <button onClick={() => setChildren(children + 1)} className="size-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-colors"><span className="material-symbols-outlined text-sm">add</span></button>
+                     </div>
+                  </div>
+               </div>
+             )}
           </div>
 
-          <div className="col-span-2 md:col-span-12 mt-1">
-            <button 
-              onClick={handleSearch}
-              className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-[0.99] group"
-            >
-              <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
-              <span className="text-xs uppercase tracking-widest">Explore {activeTab}</span>
-            </button>
+          <div className="md:col-span-12 mt-2">
+             <button 
+               onClick={handleSearch}
+               className="w-full h-14 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/30 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-3"
+             >
+                <span className="material-symbols-outlined text-xl">search</span>
+                Search {activeTab}
+             </button>
           </div>
+
         </div>
       </div>
     </div>

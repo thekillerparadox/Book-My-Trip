@@ -60,7 +60,16 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
   const [input, setInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatSession, setChatSession] = useState<Chat | null>(null);
+  const [thinkingStep, setThinkingStep] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const thoughts = [
+    "Processing intent...",
+    "Scanning accessibility data...",
+    "Formulating helpful response...",
+    "Checking navigation paths...",
+    "Ensuring clarity..."
+  ];
 
   // Voice State
   const [isVoiceActive, setIsVoiceActive] = useState(false);
@@ -140,6 +149,17 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isChatLoading]);
 
+  useEffect(() => {
+    let interval: any;
+    if (isChatLoading) {
+      setThinkingStep(0);
+      interval = setInterval(() => {
+        setThinkingStep(prev => (prev + 1) % thoughts.length);
+      }, 1500);
+    }
+    return () => clearInterval(interval);
+  }, [isChatLoading]);
+
   // Chat Handlers
   const handleSendMessage = async (textOverride?: string) => {
     const textToSend = textOverride || input;
@@ -153,17 +173,22 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
       const result = await chatSession.sendMessageStream({ message: textToSend });
       
       let fullText = '';
-      setMessages(prev => [...prev, { role: 'model', text: '', timestamp: new Date() }]); // Placeholder
+      let isFirstChunk = true;
 
       for await (const chunk of result) {
         const text = chunk.text;
         if (text) {
           fullText += text;
-          setMessages(prev => {
-            const newMsgs = [...prev];
-            newMsgs[newMsgs.length - 1] = { ...newMsgs[newMsgs.length - 1], text: fullText };
-            return newMsgs;
-          });
+          if (isFirstChunk) {
+            setMessages(prev => [...prev, { role: 'model', text: fullText, timestamp: new Date() }]);
+            isFirstChunk = false;
+          } else {
+            setMessages(prev => {
+              const newMsgs = [...prev];
+              newMsgs[newMsgs.length - 1] = { ...newMsgs[newMsgs.length - 1], text: fullText };
+              return newMsgs;
+            });
+          }
         }
       }
     } catch (err) {
@@ -323,8 +348,8 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
                    <p className="text-[10px] opacity-80 uppercase tracking-wider font-bold flex items-center gap-1">
                      {mode === 'chat' ? (
                          <>
-                           <span className="size-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                           Thinking Mode Active
+                           <span className={`size-1.5 rounded-full ${isChatLoading ? 'bg-yellow-300 animate-pulse' : 'bg-green-400'}`}></span>
+                           {isChatLoading ? 'Thinking Mode' : 'Online'}
                          </>
                      ) : (
                          <>
@@ -388,13 +413,18 @@ export const AccessibilityAgent: React.FC<AccessibilityAgentProps> = ({ setView 
                          </div>
                        ))}
                        
+                       {/* Thinking Indicator */}
                        {isChatLoading && (
-                         <div className="flex justify-start pl-10">
-                           <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 dark:border-white/5 flex gap-1.5 items-center">
-                              <span className="size-1.5 bg-primary/40 rounded-full animate-bounce"></span>
-                              <span className="size-1.5 bg-primary/40 rounded-full animate-bounce delay-100"></span>
-                              <span className="size-1.5 bg-primary/40 rounded-full animate-bounce delay-200"></span>
-                              <span className="text-[10px] text-text-sec-light dark:text-text-sec-dark ml-1">Thinking...</span>
+                         <div className="flex justify-start pl-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                           <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 dark:border-white/5 flex flex-col gap-2 min-w-[180px]">
+                              <div className="flex items-center gap-2">
+                                <span className="size-1.5 bg-primary rounded-full animate-bounce"></span>
+                                <span className="size-1.5 bg-primary rounded-full animate-bounce delay-100"></span>
+                                <span className="size-1.5 bg-primary rounded-full animate-bounce delay-200"></span>
+                              </div>
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-primary opacity-80 animate-pulse transition-all duration-300">
+                                {thoughts[thinkingStep]}
+                              </p>
                            </div>
                          </div>
                        )}

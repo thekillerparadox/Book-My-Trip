@@ -364,4 +364,21 @@ export const TourGuideSection: React.FC<TourGuideSectionProps> = ({ onBook }) =>
 
                     <div className="mt-auto pt-6 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
                        <div>
-                          <p className="
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-text-sec-light opacity-60">Daily Rate</p>
+                          <p className="text-lg font-black text-primary">{guide.pricePerDay}</p>
+                       </div>
+                       <button 
+                          onClick={() => handleBookGuide(guide)}
+                          className="px-6 py-2.5 bg-primary text-white rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg hover:bg-primary/90 transition-all active:scale-95"
+                       >
+                          Request
+                       </button>
+                    </div>
+                 </div>
+              </div>
+           ))}
+        </div>
+      </div>
+    </section>
+  );
+};

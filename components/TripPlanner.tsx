@@ -32,11 +32,11 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
   const [thoughtStep, setThoughtStep] = useState(0);
 
   const thoughts = [
-    "Analyzing group psychology and needs...",
-    "Scanning weather patterns for requested dates...",
-    "Filtering for budget-appropriate luxury...",
+    "Analyzing group dynamics & requirements...",
+    "Scanning global weather patterns...",
+    "Optimizing for budget vs luxury...",
     "Finding unique local experiences...",
-    "Generating optimal itinerary..."
+    "Crafting the perfect itinerary..."
   ];
 
   useEffect(() => {
@@ -321,7 +321,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ onBook }) => {
           </div>
 
           {/* Results Panel */}
-          <div className="lg:col-span-7 bg-gray-50 dark:bg-[#0A0C10] p-0 relative overflow-hidden flex flex-col min-h-[500px] lg:min-h-auto">
+          <div className="lg:col-span-7 bg-gray-50 dark:bg-[#0A0C10] p-0 relative overflow-hidden flex flex-col min-h-[400px] lg:min-h-auto">
              {/* Background Pattern */}
              <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #6366F1 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 

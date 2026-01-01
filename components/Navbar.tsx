@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AppView } from '../types';
 
@@ -84,48 +85,47 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 border-b ${
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ease-in-out border-b ${
           isScrolled || mobileMenuOpen
-            ? 'bg-white/95 dark:bg-[#0A0C10]/95 backdrop-blur-md border-gray-200/50 dark:border-white/5 py-4 shadow-sm'
-            : 'bg-transparent border-transparent py-5 md:py-8'
+            ? 'bg-white/90 dark:bg-[#020617]/90 backdrop-blur-xl border-gray-200/50 dark:border-white/5 py-3 shadow-lg'
+            : 'bg-transparent border-transparent py-6'
         }`}
       >
-        <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex items-center justify-between gap-6">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-8 flex items-center justify-between gap-6">
           {/* Logo */}
           <div
-            className="flex items-center gap-4 cursor-pointer group select-none flex-shrink-0"
+            className="flex items-center gap-3 cursor-pointer group select-none flex-shrink-0"
             onClick={() => handleNavClick({ label: 'Home', view: 'home', icon: 'home', sectionId: 'flights' })}
           >
             {/* Minimal Vector Compass Logo with Continuous Animation */}
-            <div className="relative size-10 md:size-11 flex items-center justify-center">
+            <div className="relative size-10 flex items-center justify-center">
                <svg 
                  viewBox="0 0 24 24" 
                  fill="none" 
                  xmlns="http://www.w3.org/2000/svg" 
                  className={`w-full h-full transition-colors duration-300 ${isScrolled || mobileMenuOpen ? 'text-primary' : 'text-white'}`}
                >
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" className="opacity-30" />
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" className="opacity-30" />
                   <path 
-                    d="M12 4L14 12L12 20L10 12L12 4Z" 
+                    d="M12 4L14.5 12L12 20L9.5 12L12 4Z" 
                     fill="currentColor" 
-                    className="origin-center animate-compass-spin" 
+                    className="origin-center animate-[spin_8s_linear_infinite]" 
                   />
-                  <circle cx="12" cy="12" r="1" fill="currentColor" className="text-white dark:text-black" />
                </svg>
             </div>
             
-            <div className="flex flex-col leading-none justify-center gap-0.5">
-               <span className={`text-xl md:text-2xl font-black tracking-tighter font-display transition-colors ${isScrolled || mobileMenuOpen ? 'text-text-main-light dark:text-text-main-dark' : 'text-white shadow-black/20 drop-shadow-md'}`}>
+            <div className="flex flex-col leading-none justify-center">
+               <span className={`text-xl font-black tracking-tighter font-display transition-colors ${isScrolled || mobileMenuOpen ? 'text-text-main-light dark:text-text-main-dark' : 'text-white shadow-black/20 drop-shadow-md'}`}>
                   Book<span className="text-primary">My</span>Trip
                </span>
             </div>
           </div>
 
           {/* Desktop Nav */}
-          <nav className={`hidden lg:flex items-center gap-2 p-1.5 rounded-full border backdrop-blur-xl transition-all duration-300 ${
+          <nav className={`hidden lg:flex items-center gap-1 p-1.5 rounded-full border backdrop-blur-xl transition-all duration-300 ${
              isScrolled 
-             ? 'bg-gray-100/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10 shadow-inner' 
-             : 'bg-black/20 border-white/10 shadow-lg'
+             ? 'bg-gray-100/50 dark:bg-white/5 border-gray-200/50 dark:border-white/10' 
+             : 'bg-black/30 border-white/10'
           }`}>
             {navLinks.map((link) => {
               const isActive = currentView === link.view && (!link.sectionId || (link.sectionId === 'flights' && window.scrollY < 500));
@@ -133,9 +133,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
                 <button
                   key={link.label}
                   onClick={() => handleNavClick(link)}
-                  className={`relative px-6 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 overflow-hidden group ${
+                  className={`relative px-5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 overflow-hidden group ${
                     isActive
-                      ? 'bg-white dark:bg-gray-800 text-primary shadow-sm scale-100'
+                      ? 'bg-white dark:bg-surface-dark text-primary shadow-sm scale-100'
                       : isScrolled 
                         ? 'text-text-sec-light dark:text-text-sec-dark hover:text-text-main-light dark:hover:text-text-main-dark hover:bg-white/50 dark:hover:bg-white/5' 
                         : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -145,16 +145,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
                     {link.icon}
                   </span>
                   {link.label}
-                  {isActive && (
-                    <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full animate-in fade-in zoom-in"></span>
-                  )}
                 </button>
               );
             })}
           </nav>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
+          <div className="flex items-center gap-3 flex-shrink-0">
             {/* Expandable Search */}
             <div className={`flex items-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
                 searchOpen 
@@ -163,7 +160,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
             } ${!isScrolled && !searchOpen ? 'hover:bg-white/10' : ''}`}>
                <input 
                  type="text" 
-                 placeholder="Search..." 
+                 placeholder="Search destination..." 
                  className={`bg-transparent border-none text-xs w-full focus:ring-0 px-0 placeholder:text-text-sec-light dark:placeholder:text-text-sec-dark/50 ${
                     isScrolled ? 'text-text-main-light dark:text-text-main-dark' : 'text-white placeholder:text-white/70'
                  } ${searchOpen ? 'opacity-100' : 'opacity-0 w-0'} transition-opacity duration-300`}
@@ -176,37 +173,31 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
                     : 'text-white'
                 }`}
                >
-                 <span className="material-symbols-outlined text-[22px]">search</span>
+                 <span className="material-symbols-outlined text-[20px]">search</span>
                </button>
             </div>
 
-            <div className={`h-6 w-px hidden md:block ${isScrolled ? 'bg-gray-200 dark:bg-white/10' : 'bg-white/20'}`}></div>
-
             {/* Auth Buttons - Desktop */}
-            <div className="hidden md:flex items-center gap-3">
-              <button className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
+            <div className="hidden md:flex items-center gap-2">
+              <button className={`size-10 rounded-full flex items-center justify-center transition-all ${
                   isScrolled 
-                  ? 'text-text-sec-light dark:text-text-sec-dark hover:text-primary hover:bg-primary/5' 
-                  : 'text-white/90 hover:text-white hover:bg-white/10'
+                  ? 'text-text-main-light dark:text-text-main-dark hover:bg-gray-100 dark:hover:bg-white/10' 
+                  : 'text-white hover:bg-white/10'
               }`}>
-                Log In
-              </button>
-              <button className="px-6 py-2.5 bg-primary text-white rounded-xl text-xs font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 hover:-translate-y-0.5 transition-all active:scale-95 flex items-center gap-2 group">
-                <span>Sign Up</span>
-                <span className="material-symbols-outlined text-xs group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                 <span className="material-symbols-outlined">account_circle</span>
               </button>
             </div>
 
             {/* Mobile Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`lg:hidden size-12 flex items-center justify-center rounded-full transition-all active:scale-90 ${
+              className={`lg:hidden size-10 flex items-center justify-center rounded-full transition-all active:scale-90 ${
                   isScrolled || mobileMenuOpen
-                  ? 'bg-gray-100 dark:bg-white/10 text-text-main-light dark:text-text-main-dark hover:bg-gray-200 dark:hover:bg-white/20'
-                  : 'bg-white/10 text-white backdrop-blur-md hover:bg-white/20'
+                  ? 'bg-gray-100 dark:bg-white/10 text-text-main-light dark:text-text-main-dark'
+                  : 'bg-white/10 text-white backdrop-blur-md'
               }`}
             >
-              <span className="material-symbols-outlined text-[26px] transition-transform duration-300" style={{ transform: mobileMenuOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+              <span className="material-symbols-outlined text-[24px] transition-transform duration-300" style={{ transform: mobileMenuOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>
                 {mobileMenuOpen ? 'close' : 'menu'}
               </span>
             </button>
@@ -216,21 +207,19 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
 
       {/* Mobile Menu Overlay */}
       <div 
-        className={`fixed inset-0 z-[90] bg-white/95 dark:bg-[#0A0C10]/95 backdrop-blur-2xl transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) flex flex-col lg:hidden ${
-          mobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+        className={`fixed inset-0 z-[90] bg-white dark:bg-[#020617] transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) flex flex-col lg:hidden ${
+          mobileMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-full pointer-events-none'
         }`}
       >
-        <div className="flex-1 flex flex-col justify-center px-6 md:px-12 gap-6 pt-20">
+        <div className="flex-1 flex flex-col justify-center px-8 gap-6 pt-20">
            {navLinks.map((link, idx) => (
              <button
                key={link.label}
                onClick={() => handleNavClick(link)}
-               className={`flex items-center gap-6 p-4 rounded-3xl transition-all group ${
-                 mobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-               } hover:bg-gray-50 dark:hover:bg-white/5 active:scale-[0.98]`}
+               className="flex items-center gap-6 p-4 rounded-3xl transition-all group hover:bg-gray-50 dark:hover:bg-white/5 active:scale-[0.98]"
                style={{ transitionDelay: `${idx * 50}ms` }}
              >
-                <div className={`size-14 rounded-2xl flex items-center justify-center shadow-lg transition-all group-hover:scale-110 ${
+                <div className={`size-16 rounded-2xl flex items-center justify-center shadow-lg transition-all group-hover:scale-110 ${
                   currentView === link.view
                   ? 'bg-primary text-white shadow-primary/30'
                   : 'bg-gray-100 dark:bg-white/5 text-text-sec-light dark:text-text-sec-dark group-hover:bg-white group-hover:text-primary'
@@ -238,28 +227,20 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView }) => {
                    <span className="material-symbols-outlined text-3xl">{link.icon}</span>
                 </div>
                 <div className="text-left">
-                  <span className={`block text-2xl font-black tracking-tight transition-colors ${
+                  <span className={`block text-3xl font-black tracking-tight transition-colors ${
                     currentView === link.view ? 'text-primary' : 'text-text-main-light dark:text-text-main-dark group-hover:text-primary'
                   }`}>{link.label}</span>
-                  <span className="text-xs font-bold text-text-sec-light dark:text-text-sec-dark uppercase tracking-widest opacity-60">
-                    {link.label === 'Destinations' ? 'Explore Trending' : link.label === 'Flights' ? 'Book Now' : 'View Section'}
-                  </span>
                 </div>
-                <span className="material-symbols-outlined ml-auto text-2xl opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary">arrow_forward</span>
+                <span className="material-symbols-outlined ml-auto text-3xl opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary">arrow_forward</span>
              </button>
            ))}
         </div>
         
-        <div className="p-8 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 backdrop-blur-md">
-           <div className="flex flex-col gap-4">
-             <button className="w-full py-4 rounded-2xl bg-primary text-white font-bold text-base shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
-               <span>Create Free Account</span>
-               <span className="material-symbols-outlined text-xl">person_add</span>
-             </button>
-             <button className="w-full py-4 rounded-2xl border-2 border-gray-200 dark:border-white/10 font-bold text-base text-text-main-light dark:text-text-main-dark hover:bg-white dark:hover:bg-white/5 active:scale-95 transition-all">
-               Log In
-             </button>
-           </div>
+        <div className="p-8 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 pb-12">
+           <button className="w-full py-5 rounded-2xl bg-primary text-white font-bold text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
+             <span>Log In / Sign Up</span>
+             <span className="material-symbols-outlined text-2xl">login</span>
+           </button>
         </div>
       </div>
     </>

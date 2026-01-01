@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom/client';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { MoodSection } from './components/MoodSection';
@@ -12,118 +13,36 @@ import { Footer } from './components/Footer';
 import { TripsSection } from './components/TripsSection';
 import { AIVisualizer } from './components/AIVisualizer';
 import { ReviewsSection } from './components/ReviewsSection';
+import { FeedbackSection } from './components/FeedbackSection';
 import { AccessibilityPanel } from './components/AccessibilityPanel';
 import { AccessibilityAgent } from './components/AccessibilityAgent';
 import { PartnersSection } from './components/PartnersSection';
 import { MobileAppPromo } from './components/MobileAppPromo';
 import { AppView, Trip } from './types';
 
-const MOCK_TRIPS: Trip[] = [
-  {
-    id: 'trip_1',
-    destinationName: 'Santorini, Greece',
-    tripTitle: 'Anniversary Getaway',
-    image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=1200&auto=format&fit=crop',
-    dates: 'Oct 15 - Oct 22',
-    travelers: '2 Adults',
-    price: '₹1,20,000',
-    type: 'Vacation Package',
-    bookedAt: Date.now() - 10000000,
-    status: 'completed'
-  },
-  {
-    id: 'trip_2',
-    destinationName: 'Kyoto, Japan',
-    tripTitle: 'Cultural Exploration',
-    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=1200&auto=format&fit=crop',
-    dates: 'Nov 05 - Nov 12',
-    travelers: '1 Adult',
-    price: '₹1,15,000',
-    type: 'Solo Trip',
-    bookedAt: Date.now() - 5000000,
-    status: 'completed'
-  },
-  {
-    id: 'trip_3',
-    destinationName: 'Maldives',
-    tripTitle: 'Ocean Paradise',
-    image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?q=80&w=1200&auto=format&fit=crop',
-    dates: 'Dec 01 - Dec 07',
-    travelers: '2 Adults, 1 Child',
-    price: '₹2,50,000',
-    type: 'Luxury Resort',
-    bookedAt: Date.now() - 2000000,
-    status: 'upcoming'
-  },
-  {
-    id: 'trip_4',
-    destinationName: 'New York City, USA',
-    tripTitle: 'Business Conference',
-    image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1200&auto=format&fit=crop',
-    dates: 'Sep 10 - Sep 15',
-    travelers: '1 Adult',
-    price: '₹1,80,000',
-    type: 'Business Class',
-    bookedAt: Date.now() - 15000000,
-    status: 'completed'
-  },
-  {
-    id: 'trip_5',
-    destinationName: 'Paris, France',
-    tripTitle: 'Summer Vacation',
-    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1200&auto=format&fit=crop',
-    dates: 'Aug 01 - Aug 10',
-    travelers: '2 Adults, 2 Children',
-    price: '₹2,40,000',
-    type: 'Family Suite',
-    bookedAt: Date.now() - 20000000,
-    status: 'cancelled'
-  }
-];
-
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>('home');
   const [trips, setTrips] = useState<Trip[]>([]);
 
-  // Load trips from localStorage on mount
   useEffect(() => {
     const savedTrips = localStorage.getItem('bmt_trips');
     if (savedTrips) {
       try {
-        const parsed = JSON.parse(savedTrips);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-           setTrips(parsed);
-        } else {
-           setTrips(MOCK_TRIPS);
-           localStorage.setItem('bmt_trips', JSON.stringify(MOCK_TRIPS));
-        }
+        setTrips(JSON.parse(savedTrips));
       } catch (e) {
         console.error("Failed to parse saved trips", e);
-        setTrips(MOCK_TRIPS);
-        localStorage.setItem('bmt_trips', JSON.stringify(MOCK_TRIPS));
       }
-    } else {
-      setTrips(MOCK_TRIPS);
-      localStorage.setItem('bmt_trips', JSON.stringify(MOCK_TRIPS));
     }
   }, []);
 
   const handleBookTrip = (trip: Trip) => {
-    // Ensure status is set for new bookings
     const newTrip = { ...trip, status: trip.status || 'upcoming' };
     const updatedTrips = [newTrip, ...trips];
     setTrips(updatedTrips);
     localStorage.setItem('bmt_trips', JSON.stringify(updatedTrips));
-    // Automatically switch to trips view to show the new booking
-    if (window.confirm(`Booking Confirmed! View your trip to ${trip.destinationName}?`)) {
+    if (window.confirm(`Trip to ${trip.destinationName} booked! See your itinerary?`)) {
       setCurrentView('trips');
     }
-  };
-
-  const handleRemoveTrip = (id: string) => {
-    const updatedTrips = trips.filter(t => t.id !== id);
-    setTrips(updatedTrips);
-    localStorage.setItem('bmt_trips', JSON.stringify(updatedTrips));
   };
 
   const renderContent = () => {
@@ -131,30 +50,23 @@ const App: React.FC = () => {
       case 'guides':
         return <TourGuideSection onBook={handleBookTrip} />;
       case 'trips':
-        return (
-          <div className="pt-24 w-full flex justify-center min-h-[60vh]">
-            <TripsSection trips={trips} onRemove={handleRemoveTrip} onGoHome={() => setCurrentView('home')} />
-          </div>
-        );
+        return <div className="pt-24 w-full flex justify-center min-h-[80vh]"><TripsSection trips={trips} onRemove={(id) => { const next = trips.filter(t => t.id !== id); setTrips(next); localStorage.setItem('bmt_trips', JSON.stringify(next)); }} onGoHome={() => setCurrentView('home')} /></div>;
       case 'home':
       default:
         return (
           <div className="w-full flex flex-col items-center">
             <Hero onBook={handleBookTrip} />
-            {/* 
-                Adjusted margin top for better spacing between Hero widget and content.
-                The widget has been moved up (translate-y-30%), so we reduce the margin top here.
-            */}
-            <div className="w-full flex flex-col items-center gap-6 md:gap-8 mt-[250px] md:mt-[200px]">
-              <MoodSection />
-              <TrendingSection />
-              <TripPlanner onBook={handleBookTrip} />
-              <AIVisualizer />
-              <InternationalGateway onBook={handleBookTrip} />
-              <ReviewsSection />
-              <PartnersSection />
-              <MobileAppPromo />
-              <Newsletter />
+            <div className="w-full flex flex-col items-center gap-16 md:gap-24 mt-48 sm:mt-56 md:mt-32 lg:mt-32">
+              <div className="w-full reveal"><MoodSection /></div>
+              <div className="w-full reveal"><TrendingSection /></div>
+              <div className="w-full reveal"><TripPlanner onBook={handleBookTrip} /></div>
+              <div className="w-full reveal"><AIVisualizer /></div>
+              <div className="w-full reveal"><InternationalGateway onBook={handleBookTrip} /></div>
+              <div className="w-full reveal"><ReviewsSection /></div>
+              <div className="w-full reveal"><FeedbackSection trips={trips} /></div>
+              <div className="w-full reveal"><PartnersSection /></div>
+              <div className="w-full reveal"><MobileAppPromo /></div>
+              <div className="w-full reveal"><Newsletter /></div>
             </div>
           </div>
         );
@@ -162,14 +74,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center overflow-x-hidden">
+    <div className="w-full flex flex-col items-center overflow-x-hidden min-h-screen">
       <Navbar currentView={currentView} setView={setCurrentView} />
-      <main className="w-full flex flex-col items-center min-h-[100vh]">
+      <main className="w-full flex flex-col items-center flex-1">
         {renderContent()}
       </main>
       <Footer />
-      
-      {/* Accessibility Features */}
       <AccessibilityPanel />
       <AccessibilityAgent setView={setCurrentView} />
     </div>
